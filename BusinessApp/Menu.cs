@@ -16,6 +16,7 @@ namespace BusinessApp
         SalesRepository salesRepository = new SalesRepository(Console.WriteLine);
         public void StartMenu()
         {
+            Console.Clear();
             Console.WriteLine("Welcome! This is Business App.\n");
             Console.WriteLine("Please, choose the option:");
             Console.WriteLine("\n1. Create new Goods\n2. Check Goods\n3. Create new Units\n4. Check Units\n5. Create new Sales\n6. Check sales\n0. Exit");
@@ -185,20 +186,34 @@ namespace BusinessApp
         //Запуск работы c Sales
         private void StartSalesExecution(Sales sales)
         {
-            GettingSalesGoodsIDFromGoods(sales);
-            salesRepository.CheckSalesID(sales);//ID покупки
-            GettingSalesUnitsIDFromUnits(sales);
-            GettingSalesQuantity(sales);
-            GettingSalesPrice(sales);
+            string line = "";
+            line = GettingSalesID(sales, line);
+            line = GettingSalesGoodsIDFromGoods(sales, line);
+            line = GettingSalesUnitsIDFromUnits(sales, line);
+            line = GettingSalesQuantity(sales, line);
+            line = GettingSalesPrice(sales, line);
+            line = salesRepository.WriteSalesFile(sales, line);
 
+        }
+        //ID покупки
+        private string GettingSalesID(Sales sales, string line)
+        {
+            string result;
+            salesRepository.CheckSalesID(sales);
+            result = Convert.ToString(sales.SalesID);
+            result += ";";
+            line += result;
+            return line;
         }
         //Вписываем в строку имя товара(Goods).
         //Если товар есть в базе, берём его ID, если нет то создаем новый товар и продолжаем работу 
-        private void GettingSalesGoodsIDFromGoods(Sales sales)
+        private string GettingSalesGoodsIDFromGoods(Sales sales, string line)
         {
+            string result;
             int GoodsID = 0;
             Goods goods = new Goods();
             Console.Write("Enter the name of product: ");
+            goods.GoodsName = Console.ReadLine();
             GoodsID = CheckingGoodsID(GoodsID, goods);
             if (GoodsID == 0)
             {
@@ -207,11 +222,15 @@ namespace BusinessApp
                 sales.SalesGoodsID = goods.GoodsID;
             }
             else sales.SalesGoodsID = GoodsID;
+            result = Convert.ToString(sales.SalesGoodsID);
+            result += ";";
+            line += result;
+            return line;
         }
         private int CheckingGoodsID(int GoodsID,Goods goods)
         {
             bool exist = false;
-            goods.GoodsName = Console.ReadLine();
+            
             exist = goodsRepository.GoodsMatchCheck(goods);
             if (exist==true)
             {
@@ -221,11 +240,13 @@ namespace BusinessApp
         }
         //Вписываем в строку тип товара(Units).
         //Если тип товара есть в базе, берём его ID, если нет то создаем новый и продолжаем работу 
-        private void GettingSalesUnitsIDFromUnits(Sales sales)
+        private string GettingSalesUnitsIDFromUnits(Sales sales, string line)
         {
+            string result;
             int UnitsID = 0;
             Units units = new Units();
             Console.Write("Enter the type of product: ");
+            units.UnitsName = Console.ReadLine();
             UnitsID = CheckingUnitsID(UnitsID, units);
             if (UnitsID == 0)
             {
@@ -234,11 +255,15 @@ namespace BusinessApp
                 sales.SalesUnitsID = units.UnitsID;
             }
             else sales.SalesUnitsID = UnitsID;
+            result = Convert.ToString(sales.SalesUnitsID);
+            result += ";";
+            line += result;
+            return line;
         }
         private int CheckingUnitsID(int UnitsID, Units units)
         {
             bool exist = false;
-            units.UnitsName = Console.ReadLine();
+            
             exist = unitsRepository.UnitsMatchCheck(units);
             if (exist == true)
             {
@@ -247,16 +272,26 @@ namespace BusinessApp
             return UnitsID;
         }
         //Получаем со строки Quantity
-        private void GettingSalesQuantity(Sales sales)
+        private string GettingSalesQuantity(Sales sales, string line)
         {
+            string result;
             Console.Write("Enter the quantity of units: ");
             sales.SalesQuantity = Convert.ToInt32(Console.ReadLine());
+            result = Convert.ToString(sales.SalesQuantity);
+            result += ";";
+            line += result;
+            return line;
         }
         //Получаем со строки Price
-        private void GettingSalesPrice(Sales sales)
+        private string GettingSalesPrice(Sales sales, string line)
         {
+            string result;
             Console.Write("Enter the quantity of units: ");
             sales.SalesPrice = Convert.ToInt32(Console.ReadLine());
+            result = Convert.ToString(sales.SalesPrice);
+            result += ";";
+            line += result;
+            return line;
         }
     }
 }

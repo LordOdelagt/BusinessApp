@@ -77,6 +77,7 @@ namespace Repository
                     string[] values = line.Split(';');
                     if (values[1].Contains(units.UnitsName)) //перепроверка второго элемента масива, который является именем 
                     {
+                        units.UnitsID = Convert.ToInt32(values[0]);
                         exist = true;
                         break;
                     }

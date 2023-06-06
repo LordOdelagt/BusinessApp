@@ -31,8 +31,23 @@ namespace Repository
                 }
             }
             sales.SalesID = Counter;
-            Counter++;
         }
-
+        //Запись нового элемента
+        public string WriteSalesFile(Sales sales, string line)
+        {
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
+                {
+                    writer.Write($"\n{line}");
+                }
+                Counter++;
+            }
+            catch (IOException e)
+            {
+                warningnMessage("An error occurred while creating the CSV file: " + e.Message);
+            }
+            return line;
+        }
     }
 }
