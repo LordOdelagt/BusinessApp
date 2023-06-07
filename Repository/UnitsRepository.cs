@@ -66,6 +66,28 @@ namespace Repository
                 }
             }
         }
+        public void CheckUnitsByID(Units units)
+        {
+            if (units.UnitsID > 0)
+            {
+                int i = 0;
+                using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        
+                        string line = reader.ReadLine();
+                        string[] values = line.Split(';');
+                        if (i == units.UnitsID)
+                        {
+                            units.UnitsName = values[1];
+                            break;
+                        }
+                        i++;
+                    }
+                }
+            }
+        }
         //Проверка на совпадения
         public bool UnitsMatchCheck(Units units, bool exist = false)
         {

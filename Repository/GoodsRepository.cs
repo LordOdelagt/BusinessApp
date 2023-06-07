@@ -1,5 +1,6 @@
 ﻿using Entity;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -63,6 +64,29 @@ namespace Repository
                     while (reader.ReadLine() != null)
                     {
                         Counter++;
+                    }
+                }
+            }
+        }
+        //Возвращает GoodsName по GoodsID
+        public void CheckGoodsByID(Goods goods)
+        {
+            if (goods.GoodsID > 0)
+            {
+                int i = 0;
+                using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        
+                        string line = reader.ReadLine();
+                        string[] values = line.Split(';');
+                        if (i == goods.GoodsID)
+                        {
+                            goods.GoodsName = values[1];
+                            break;
+                        }
+                        i++;
                     }
                 }
             }
