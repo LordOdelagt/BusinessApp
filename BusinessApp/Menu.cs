@@ -261,11 +261,12 @@ namespace BusinessApp
         {
             if (read == false)
             {
-                GettingSalesID(sales, line, readResult, read);
-                GettingSalesGoodsIDFromGoods(sales, line, readResult, read);
-                GettingSalesUnitsIDFromUnits(sales, line, readResult, read);
-                GettingSalesQuantity(sales, line, readResult, read);
-                GettingSalesPrice(sales, line, readResult, read);
+                line = GettingSalesID(sales, line, readResult, read);
+                line = GettingSalesGoodsIDFromGoods(sales, line, readResult, read);
+                line = GettingSalesUnitsIDFromUnits(sales, line, readResult, read);
+                line = GettingSalesQuantity(sales, line, readResult, read);
+                line = GettingSalesPrice(sales, line, readResult, read);
+                return line;
             }
             else
             {
@@ -276,7 +277,6 @@ namespace BusinessApp
                 readResult = GettingSalesPrice(sales, line, readResult, read);
                 return readResult;
             }
-            return line;
         }
         //ID покупки
         private string GettingSalesID(Sales sales, string line, string readResult, bool read)
@@ -285,6 +285,7 @@ namespace BusinessApp
             if (read == false)
             {
                 salesRepository.CheckSalesID(sales);
+                sales.SalesID++;
                 buffer = Convert.ToString(sales.SalesID);
                 buffer += ";";
                 line += buffer;

@@ -66,7 +66,7 @@ namespace Repository
                 }
             }
         }
-        public void CheckUnitsByID(Units units)
+        public void SearchUnitsByID(Units units)
         {
             if (units.UnitsID > 0)
             {

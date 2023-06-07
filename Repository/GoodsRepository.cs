@@ -69,7 +69,7 @@ namespace Repository
             }
         }
         //Возвращает GoodsName по GoodsID
-        public void CheckGoodsByID(Goods goods)
+        public void SearchGoodsByID(Goods goods)
         {
             if (goods.GoodsID > 0)
             {
