@@ -323,7 +323,7 @@ namespace BusinessApp
                 sales.SalesGoodsID = Convert.ToInt32(values[1]);
                 string[] values2 = line.Split(';');
                 goods.GoodsID = Convert.ToInt32(values2[1]);
-                goodsRepository.CheckGoodsByID(goods);//Получаем GoodsName исходя из номера ID
+                goodsRepository.SearchGoodsByID(goods);//Получаем GoodsName исходя из номера ID
                 buffer = goods.GoodsName;
                 buffer += ";";
                 readResult += buffer;
@@ -353,7 +353,7 @@ namespace BusinessApp
                 sales.SalesUnitsID = Convert.ToInt32(values[2]);
                 string[] values2 = line.Split(';');
                 units.UnitsID = Convert.ToInt32(values2[2]);
-                unitsRepository.CheckUnitsByID(units);//Получаем UnitsName исходя из номера ID
+                unitsRepository.SearchUnitsByID(units);//Получаем UnitsName исходя из номера ID
                 buffer = units.UnitsName;
                 buffer += ";";
                 readResult += buffer;
