@@ -20,17 +20,19 @@ namespace Repository
         //Получаем ID будущей покупки
         public void CheckSalesID(Sales sales)
         {
-            if (Counter == 0)
             {
-                using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
+                if (Counter == 0)
                 {
-                    while (reader.ReadLine() != null)
+                    using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
                     {
-                        Counter++;
+                        while (reader.ReadLine() != null)
+                        {
+                            Counter++;
+                        }
                     }
                 }
+                sales.SalesID = Counter;
             }
-            sales.SalesID = Counter;
         }
         //Запись нового элемента
         public string WriteSalesFile(Sales sales, string line)

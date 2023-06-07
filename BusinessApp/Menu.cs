@@ -29,8 +29,9 @@ namespace BusinessApp
             switch (input)
             {
                 case "1"://Создать новый Goods
+                    bool FromSales = false;
                     Goods goods = new Goods();
-                    StartGoodsExecution(goods);
+                    StartGoodsExecution(goods, FromSales);
                     StartMenu();
                     break;
                 case "2"://Считать Goods
@@ -38,8 +39,9 @@ namespace BusinessApp
                     StartMenu();
                     break;
                 case "3":
+                    FromSales = false;
                     Units units = new Units();
-                    StartUnitsExecution(units);
+                    StartUnitsExecution(units, FromSales);
                     StartMenu();
                     break;
                 case "4":
@@ -47,8 +49,11 @@ namespace BusinessApp
                     StartMenu();
                     break;
                 case "5":
-                    Sales sales = new Sales();
-                    StartSalesExecution(sales);
+                    CreateNewSales();
+                    StartMenu();
+                    break;
+                case "6":
+                    ReadSalesFile();
                     StartMenu();
                     break;
                 default:
@@ -60,22 +65,36 @@ namespace BusinessApp
             }
         }
         //Запуск работы c Goods
-        private void StartGoodsExecution(Goods goods)
+        private void StartGoodsExecution(Goods goods, bool fromSales)
         {
             bool exist = false;
             Console.Write("Enter the name of product: ");
             goods.GoodsName = Console.ReadLine();
-            exist = goodsRepository.GoodsRepositoryExectution(goods, exist);
-            if (exist==true)
+            if (fromSales == false)
             {
-                GoodsMatchCheckTrue(goods);
+                exist = goodsRepository.GoodsRepositoryExectution(goods, exist);
+                if (exist == true)
+                {
+                    GoodsMatchCheckTrue(goods);
+                }
+                else
+                {
+                    Console.WriteLine("Position created successfully!\n Press Enter to continue...");
+                    Console.ReadLine();
+                    Console.Clear();
+                }
             }
-            else
+            else//FromSales == true
             {
-                Console.WriteLine("Position created successfully!\n Press Enter to continue...");
-                Console.ReadLine();
-                Console.Clear();
+                exist = goodsRepository.GoodsRepositoryExectution(goods, exist);
+                if (exist == false)//Такой Goods не существует, создаем новый и продолжаем
+                {
+                    Console.WriteLine($"{goods.GoodsName} doesn't exist in the database. Creating new product...\n");
+                    //goodsRepository.ExecuteGoods(goods);
+                }
+                //Или такой Goods существует, продолжаем
             }
+
         }
         //Такой Goods уже существует
         public void GoodsMatchCheckTrue(Goods goods)
@@ -85,7 +104,8 @@ namespace BusinessApp
             switch (input)
             {
                 case "y":
-                    StartGoodsExecution(goods);
+                    bool FromSales = false;
+                    StartGoodsExecution(goods, FromSales);
                     break;
                 case "n":
                     Console.Clear();
@@ -122,21 +142,34 @@ namespace BusinessApp
             Console.Clear();
         }
         //Запуск работы c Units
-        private void StartUnitsExecution(Units units)
+        private void StartUnitsExecution(Units units, bool FromSales)
         {
             bool exist = false;
             Console.Write("Enter the type of Units: ");
             units.UnitsName = Console.ReadLine();
-            exist = unitsRepository.UnitsRepositoryExectution(units, exist);
-            if (exist == true)
+            if (FromSales == false)
             {
-                UnitsMatchCheckTrue(units);
+                exist = unitsRepository.UnitsRepositoryExectution(units, exist);
+                if (exist == true)
+                {
+                    UnitsMatchCheckTrue(units);
+                }
+                else
+                {
+                    Console.WriteLine("Position created successfully!\n Press Enter to continue...");
+                    Console.ReadLine();
+                    Console.Clear();
+                }
             }
             else
             {
-                Console.WriteLine("Position created successfully!\n Press Enter to continue...");
-                Console.ReadLine();
-                Console.Clear();
+                exist = unitsRepository.UnitsRepositoryExectution(units, exist);
+                if (exist == false)//Такой Units не существует, создаем новый и продолжаем
+                {
+                    Console.WriteLine($"{units.UnitsName} doesn't exist in the database. Creating new product...\n");
+                    //unitsRepository.ExecuteUnits(units);
+                }
+                //Или такой Goods существует, продолжаем
             }
         }
         //Такой Units уже существует
@@ -147,7 +180,8 @@ namespace BusinessApp
             switch (input)
             {
                 case "y":
-                    StartUnitsExecution(units);
+                    bool FromSales = false;
+                    StartUnitsExecution(units, FromSales);
                     break;
                 case "n":
                     Console.Clear();
@@ -183,8 +217,23 @@ namespace BusinessApp
             Console.ReadLine();
             Console.Clear();
         }
-        //Запуск работы c Sales
-        private void StartSalesExecution(Sales sales)
+        
+        private void CreateNewSales()
+        {
+            Sales sales = new Sales();
+            string line = "";
+            line = StartSalesExecution(sales);
+            salesRepository.WriteSalesFile(sales, line);
+        }
+        private void ReadSalesFile()
+        {
+            Sales sales = new Sales();
+            string line = "";
+        }
+        //Запуск работы c Sales.
+        //В конечном итоге получаем полноценный объект sales со всеми параметрами
+        //плюс строку дублирующую его параметры для потенциального чтения и записи
+        private string StartSalesExecution(Sales sales)
         {
             string line = "";
             line = GettingSalesID(sales, line);
@@ -192,14 +241,13 @@ namespace BusinessApp
             line = GettingSalesUnitsIDFromUnits(sales, line);
             line = GettingSalesQuantity(sales, line);
             line = GettingSalesPrice(sales, line);
-            line = salesRepository.WriteSalesFile(sales, line);
-
+            return line;
         }
         //ID покупки
         private string GettingSalesID(Sales sales, string line)
         {
-            string result;
             salesRepository.CheckSalesID(sales);
+            string result;
             result = Convert.ToString(sales.SalesID);
             result += ";";
             line += result;
@@ -207,69 +255,29 @@ namespace BusinessApp
         }
         //Вписываем в строку имя товара(Goods).
         //Если товар есть в базе, берём его ID, если нет то создаем новый товар и продолжаем работу 
-        private string GettingSalesGoodsIDFromGoods(Sales sales, string line)
+        private string GettingSalesGoodsIDFromGoods(Sales sales, string line, bool FromSales = true)
         {
             string result;
-            int GoodsID = 0;
             Goods goods = new Goods();
-            Console.Write("Enter the name of product: ");
-            goods.GoodsName = Console.ReadLine();
-            GoodsID = CheckingGoodsID(GoodsID, goods);
-            if (GoodsID == 0)
-            {
-                Console.WriteLine($"{goods.GoodsName} doesn't exist in the database. Creating new product...\n");
-                goodsRepository.ExecuteGoods(goods);
-                sales.SalesGoodsID = goods.GoodsID;
-            }
-            else sales.SalesGoodsID = GoodsID;
+            StartGoodsExecution(goods, FromSales);
+            sales.SalesGoodsID = goods.GoodsID;
             result = Convert.ToString(sales.SalesGoodsID);
             result += ";";
             line += result;
             return line;
         }
-        private int CheckingGoodsID(int GoodsID,Goods goods)
-        {
-            bool exist = false;
-            
-            exist = goodsRepository.GoodsMatchCheck(goods);
-            if (exist==true)
-            {
-                GoodsID = goods.GoodsID;
-            }
-            return GoodsID;
-        }
         //Вписываем в строку тип товара(Units).
         //Если тип товара есть в базе, берём его ID, если нет то создаем новый и продолжаем работу 
-        private string GettingSalesUnitsIDFromUnits(Sales sales, string line)
+        private string GettingSalesUnitsIDFromUnits(Sales sales, string line, bool FromSales = true)
         {
             string result;
-            int UnitsID = 0;
             Units units = new Units();
-            Console.Write("Enter the type of product: ");
-            units.UnitsName = Console.ReadLine();
-            UnitsID = CheckingUnitsID(UnitsID, units);
-            if (UnitsID == 0)
-            {
-                Console.WriteLine($"{units.UnitsName} doesn't exist in the database. Creating new type of product...\n");
-                unitsRepository.ExecuteUnits(units);
-                sales.SalesUnitsID = units.UnitsID;
-            }
-            else sales.SalesUnitsID = UnitsID;
+            StartUnitsExecution(units, FromSales);
+            sales.SalesUnitsID= units.UnitsID;
             result = Convert.ToString(sales.SalesUnitsID);
             result += ";";
             line += result;
             return line;
-        }
-        private int CheckingUnitsID(int UnitsID, Units units)
-        {
-            bool exist = false;
-            
-            exist = unitsRepository.UnitsMatchCheck(units);
-            if (exist == true)
-            {
-                UnitsID = units.UnitsID;
-            }
-            return UnitsID;
         }
         //Получаем со строки Quantity
         private string GettingSalesQuantity(Sales sales, string line)
@@ -293,5 +301,6 @@ namespace BusinessApp
             line += result;
             return line;
         }
+
     }
 }
