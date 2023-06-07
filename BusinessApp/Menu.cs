@@ -94,7 +94,6 @@ namespace BusinessApp
                 }
                 //Или такой Goods существует, продолжаем
             }
-
         }
         //Такой Goods уже существует
         public void GoodsMatchCheckTrue(Goods goods)
@@ -217,196 +216,181 @@ namespace BusinessApp
             Console.ReadLine();
             Console.Clear();
         }
-        
+
         private void CreateNewSales()
         {
             Sales sales = new Sales();
             string line = "";
-            string readResult = "";
-            bool read = false;
-            line = StartSalesExecution(sales, line, readResult, read);
+            line = StartCreateSalesExecution(sales, line);
             salesRepository.WriteSalesFile(sales, line);
         }
         private void ReadSalesFile()
         {
-            bool read = true;
             string readResult = "";
-            Sales sales = new Sales();
             Console.Clear();
             Console.WriteLine("Sales data: \n");
             using (StreamReader reader = new StreamReader(salesRepository.FilePath, Encoding.UTF8))
+            {
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+
+                    Sales sales = new Sales();
+                    string line = reader.ReadLine();
+                    readResult = StartReadSalesExecution(sales, line, readResult);
+                    string[] values = readResult.Split(';');
+                    foreach (var item in values)
                     {
-                        {
-                            string line = reader.ReadLine();
-                            readResult = StartSalesExecution(sales, line, readResult, read);
-                            string[] values = readResult.Split(';');
-                            foreach (var item in values)
-                            {
-                                Console.Write($"{item}\t\t");
-                            }
-                            Console.WriteLine();
-                        }
-                        readResult = "";
+                        Console.Write($"{item}");
+                        Console.Write($"\t\t");
                     }
+                    Console.WriteLine();
+                    readResult = "";
                 }
+            }
             Console.WriteLine("\nPress Enter to return...");
             Console.ReadLine();
         }
         //Запуск работы c Sales.
         //В конечном итоге получаем полноценный объект sales со всеми параметрами
         //плюс строку дублирующую его параметры для потенциального чтения и записи
-        private string StartSalesExecution(Sales sales, string line, string readResult, bool read)
+        private string StartCreateSalesExecution(Sales sales, string line)
         {
-            if (read == false)
-            {
-                line = GettingSalesID(sales, line, readResult, read);
-                line = GettingSalesGoodsIDFromGoods(sales, line, readResult, read);
-                line = GettingSalesUnitsIDFromUnits(sales, line, readResult, read);
-                line = GettingSalesQuantity(sales, line, readResult, read);
-                line = GettingSalesPrice(sales, line, readResult, read);
-                return line;
-            }
-            else
-            {
-                readResult = GettingSalesID(sales, line, readResult, read);
-                readResult = GettingSalesGoodsIDFromGoods(sales, line, readResult, read);
-                readResult = GettingSalesUnitsIDFromUnits(sales, line, readResult, read);
-                readResult = GettingSalesQuantity(sales, line, readResult, read);
-                readResult = GettingSalesPrice(sales, line, readResult, read);
-                return readResult;
-            }
-        }
-        //ID покупки
-        private string GettingSalesID(Sales sales, string line, string readResult, bool read)
-        {
-            string buffer;
-            if (read == false)
-            {
-                salesRepository.CheckSalesID(sales);
-                sales.SalesID++;
-                buffer = Convert.ToString(sales.SalesID);
-                buffer += ";";
-                line += buffer;
-            }
-            else
-            {
-                string[] values = line.Split(';');
-                sales.SalesID = Convert.ToInt32(values[0]);
-                buffer = Convert.ToString(sales.SalesID);
-                buffer += ";";
-                readResult += buffer;
-                return readResult;
-            }
+            line = CreateSalesID(sales, line);
+            line = CreateSalesGoodsIDFromGoods(sales, line);
+            line = CreateSalesUnitsIDFromUnits(sales, line);
+            line = CreateSalesQuantity(sales, line);
+            line = CreateSalesPrice(sales, line);
             return line;
         }
+        //Запуск работы c Sales.
+        //В конечном итоге получаем полноценный объект sales со всеми параметрами
+        //плюс строку дублирующую его параметры для потенциального чтения и записи
+        private string StartReadSalesExecution(Sales sales, string line, string readResult)
+        {
+            readResult = ReadSalesID(sales, line, readResult);
+            readResult = ReadSalesGoodsIDFromGoods(sales, line, readResult);
+            readResult = ReadSalesUnitsIDFromUnits(sales, line, readResult);
+            readResult = ReadSalesQuantity(sales, line, readResult);
+            readResult = ReadSalesPrice(sales, line, readResult);
+            return readResult;
+        }
 
-        private string GettingSalesGoodsIDFromGoods(Sales sales, string line, string readResult, bool read, bool FromSales = true)
+        //ID покупки Create
+        private string CreateSalesID(Sales sales, string line)
+        {
+            string buffer;
+            salesRepository.CheckSalesID(sales);
+            sales.SalesID++;
+            buffer = Convert.ToString(sales.SalesID);
+            buffer += ";";
+            line += buffer;
+            return line;
+        }
+        //ID покупки Read
+        private string ReadSalesID(Sales sales, string line, string readResult)
+        {
+            string buffer;
+            string[] values = line.Split(';');
+            sales.SalesID = Convert.ToInt32(values[0]);
+            buffer = Convert.ToString(sales.SalesID);
+            buffer += ";";
+            readResult += buffer;
+            return readResult;
+        }
+        //Вписываем в строку имя товара(Goods).
+        //Если товар есть в базе, берём его ID, если нет то создаем новый товар и продолжаем работу 
+        private string CreateSalesGoodsIDFromGoods(Sales sales, string line, bool FromSales = true)
         {
             string buffer;
             Goods goods = new Goods();
-            //Вписываем в строку имя товара(Goods).
-            //Если товар есть в базе, берём его ID, если нет то создаем новый товар и продолжаем работу 
-            if (read == false)
-            {
-                StartGoodsExecution(goods, FromSales);
-                sales.SalesGoodsID = goods.GoodsID;
-                buffer = Convert.ToString(sales.SalesGoodsID);
-                buffer += ";";
-                line += buffer;
-            }
-            //Действия по чтению Goods
-            else
-            {
-                string[] values = line.Split(';');
-                sales.SalesGoodsID = Convert.ToInt32(values[1]);
-                string[] values2 = line.Split(';');
-                goods.GoodsID = Convert.ToInt32(values2[1]);
-                goodsRepository.CheckGoodsByID(goods);//Получаем GoodsName исходя из номера ID
-                buffer = goods.GoodsName;
-                buffer += ";";
-                readResult += buffer;
-                return readResult;
-            }
+            StartGoodsExecution(goods, FromSales);
+            sales.SalesGoodsID = goods.GoodsID;
+            buffer = Convert.ToString(sales.SalesGoodsID);
+            buffer += ";";
+            line += buffer;
             return line;
         }
-
-        private string GettingSalesUnitsIDFromUnits(Sales sales, string line, string readResult, bool read, bool FromSales = true)
+        //Действия по чтению Goods
+        private string ReadSalesGoodsIDFromGoods(Sales sales, string line, string readResult)
+        {
+            string buffer;
+            Goods goods = new Goods();
+            string[] values = line.Split(';');
+            sales.SalesGoodsID = Convert.ToInt32(values[1]);
+            string[] values2 = line.Split(';');
+            goods.GoodsID = Convert.ToInt32(values2[1]);
+            goodsRepository.SearchGoodsByID(goods);//Получаем GoodsName исходя из номера ID
+            buffer = goods.GoodsName;
+            buffer += ";";
+            readResult += buffer;
+            return readResult;
+        }
+        private string CreateSalesUnitsIDFromUnits(Sales sales, string line, bool FromSales = true)
         {
             string buffer;
             Units units = new Units();
-            //Вписываем в строку тип товара(Units).
-            //Если тип товара есть в базе, берём его ID, если нет то создаем новый и продолжаем работу 
-            if (read == false)
-            {
-                StartUnitsExecution(units, FromSales);
-                sales.SalesUnitsID = units.UnitsID;
-                buffer = Convert.ToString(sales.SalesUnitsID);
-                buffer += ";";
-                line += buffer;
-            }
-            //Действия по чтению Units
-            else
-            {
-                string[] values = line.Split(';');
-                sales.SalesUnitsID = Convert.ToInt32(values[2]);
-                string[] values2 = line.Split(';');
-                units.UnitsID = Convert.ToInt32(values2[2]);
-                unitsRepository.CheckUnitsByID(units);//Получаем UnitsName исходя из номера ID
-                buffer = units.UnitsName;
-                buffer += ";";
-                readResult += buffer;
-                return readResult;
-            }
+            StartUnitsExecution(units, FromSales);
+            sales.SalesUnitsID = units.UnitsID;
+            buffer = Convert.ToString(sales.SalesUnitsID);
+            buffer += ";";
+            line += buffer;
             return line;
+        }
+        private string ReadSalesUnitsIDFromUnits(Sales sales, string line, string readResult)
+        {
+            string buffer;
+            Units units = new Units();
+            string[] values = line.Split(';');
+            sales.SalesUnitsID = Convert.ToInt32(values[2]);
+            string[] values2 = line.Split(';');
+            units.UnitsID = Convert.ToInt32(values2[2]);
+            unitsRepository.SearchUnitsByID(units);//Получаем UnitsName исходя из номера ID
+            buffer = units.UnitsName;
+            buffer += ";";
+            readResult += buffer;
+            return readResult;
         }
         //Получаем со строки Quantity
-        private string GettingSalesQuantity(Sales sales, string line, string readResult, bool read)
+        private string CreateSalesQuantity(Sales sales, string line)
         {
             string buffer;
-            if (read == false)
-            {
-                Console.Write("Enter the quantity of units: ");
-                sales.SalesQuantity = Convert.ToInt32(Console.ReadLine());
-                buffer = Convert.ToString(sales.SalesQuantity);
-                buffer += ";";
-                line += buffer;
-            }
-            else
-            {
-                string[] values = line.Split(';');
-                sales.SalesQuantity = Convert.ToInt32(values[3]);
-                buffer = Convert.ToString(sales.SalesQuantity);
-                buffer += ";";
-                readResult += buffer;
-                return readResult;
-            }
+            Console.Write("Enter the quantity of units: ");
+            sales.SalesQuantity = Convert.ToInt32(Console.ReadLine());
+            buffer = Convert.ToString(sales.SalesQuantity);
+            buffer += ";";
+            line += buffer;
             return line;
+        }
+        private string ReadSalesQuantity(Sales sales, string line, string readResult)
+        {
+            string buffer;
+            string[] values = line.Split(';');
+            sales.SalesQuantity = Convert.ToInt32(values[3]);
+            buffer = Convert.ToString(sales.SalesQuantity);
+            buffer += ";";
+            readResult += buffer;
+            return readResult;
         }
         //Получаем со строки Price
-        private string GettingSalesPrice(Sales sales, string line, string readResult, bool read)
+        private string CreateSalesPrice(Sales sales, string line)
         {
             string buffer;
-            if (read == false)
-            {
-                Console.Write("Enter the price: ");
-                sales.SalesPrice = Convert.ToInt32(Console.ReadLine());
-                buffer = Convert.ToString(sales.SalesPrice);
-                buffer += ";";
-                line += buffer;
-            }
-            else
-            {
-                string[] values = line.Split(';');
-                sales.SalesPrice = Convert.ToInt32(values[4]);
-                buffer = Convert.ToString(sales.SalesPrice);
-                buffer += ";";
-                readResult += buffer;
-                return readResult;
-            }
+            Console.Write("Enter the price: ");
+            sales.SalesPrice = Convert.ToInt32(Console.ReadLine());
+            buffer = Convert.ToString(sales.SalesPrice);
+            buffer += ";";
+            line += buffer;
             return line;
         }
-
+        private string ReadSalesPrice(Sales sales, string line, string readResult)
+        {
+            string buffer;
+            string[] values = line.Split(';');
+            sales.SalesPrice = Convert.ToInt32(values[4]);
+            buffer = Convert.ToString(sales.SalesPrice);
+            buffer += ";";
+            readResult += buffer;
+            return readResult;
+        }
     }
 }
