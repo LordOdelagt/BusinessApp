@@ -8,54 +8,39 @@ using System.Threading.Tasks;
 
 namespace Repository
 {
-    public class GoodsRepository
+    public class GoodsRepository : IGoodsRepository
     {
         private static int Counter = 0;
         readonly public string FilePath = "Data/GoodsData.csv";
-        readonly Action<string> warningnMessage;
+        readonly IExceptionLog warningnMessage;
         //Конструкция для сообщения об ошибке
-        public GoodsRepository(Action<string> warningMessage)
+        public GoodsRepository(IExceptionLog warningMessage)
         {
             this.warningnMessage = warningMessage;
         }
         //Начало работы с Goods
-        public bool GoodsRepositoryExectution(Goods goods, bool exist)
-        {
-            if (GoodsMatchCheck(goods) == false)
-            {
-                ExecuteGoods(goods);
-                return exist;
-            }
-            else
-            {
-                exist = true;
-                return exist;
-            }
-        }
-        public void ExecuteGoods(Goods goods)
-        {
-            CheckGoodsID();
-            WriteGoodsFile(goods);
-        }
+        
         //Запись нового элемента
-        public void WriteGoodsFile(Goods goods)
+        public Goods CreateGoods(string name)
         {
-            goods.GoodsID = Counter;
+            var goods = new Goods { Id = CheckGoodsID(), Name = name };
             try
             {
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
                 {
-                    writer.Write($"\n{goods.GoodsID};{goods.GoodsName}");
+                    writer.Write($"\n{goods.ToCsv()}");
                 }
                 Counter++;
             }
             catch (IOException e)
             {
-                warningnMessage("An error occurred while creating the CSV file: " + e.Message);
+                warningnMessage.Log("An error occurred while creating the CSV file: " + e.Message);
+                throw new IOException();
             }
+            return goods;
         }
         //Получение количества строк. ID будущего элемента = Counter. 
-        private void CheckGoodsID()
+        private int CheckGoodsID()
         {
             if (Counter == 0)
             {
@@ -67,11 +52,12 @@ namespace Repository
                     }
                 }
             }
+            return Counter;
         }
         //Возвращает GoodsName по GoodsID
-        public void SearchGoodsByID(Goods goods)
+        public Goods SearchGoodsByID(int id)
         {
-            if (goods.GoodsID > 0)
+            if (goods.Id > 0)
             {
                 int i = 0;
                 using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
@@ -81,9 +67,9 @@ namespace Repository
                         
                         string line = reader.ReadLine();
                         string[] values = line.Split(';');
-                        if (i == goods.GoodsID)
+                        if (i == goods.Id)
                         {
-                            goods.GoodsName = values[1];
+                            goods.Name = values[1];
                             break;
                         }
                         i++;
@@ -92,7 +78,7 @@ namespace Repository
             }
         }
         //Проверка на совпадения
-        public bool GoodsMatchCheck(Goods goods, bool exist = false)
+        public Goods GetGoodsByName(string? name)
         {
             using (StreamReader reader = new StreamReader(FilePath))
             {
@@ -100,15 +86,16 @@ namespace Repository
                 {
                     string line = reader.ReadLine();
                     string[] values = line.Split(';');
-                    if (values[1].Contains(goods.GoodsName)) //перепроверка второго элемента масива, который является именем 
+                    if (values[1].Equals(name, StringComparison.InvariantCultureIgnoreCase)) //перепроверка второго элемента масива, который является именем 
                     {
-                        goods.GoodsID = Convert.ToInt32(values[0]);
-                        exist = true;
-                        break;
+                        int id = Convert.ToInt32(values[0]);
+                        return new Goods { Id = id, Name = name };
                     }
                 }
             }
-            return exist;
+            return null;
         }
+
+        
     }
 }

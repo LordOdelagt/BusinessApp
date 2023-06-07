@@ -34,6 +34,32 @@ namespace Repository
                 sales.SalesID = Counter;
             }
         }
+        //Не готово 
+        public void SearchSalesByID(Sales sales)
+        {
+            if (sales.SalesID > 0)
+            {
+                int i = 0;
+                using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        string line = reader.ReadLine();
+                        string[] values = line.Split(';');
+                        if (i == sales.SalesID)
+                        {
+                            sales.SalesID = Convert.ToInt32(values[0]);
+                            sales.SalesGoodsID = Convert.ToInt32(values[1]);
+                            sales.SalesUnitsID = Convert.ToInt32(values[2]);
+                            sales.SalesQuantity = Convert.ToInt32(values[3]);
+                            sales.SalesPrice = Convert.ToInt32(values[4]);
+                            break;
+                        }
+                        i++;
+                    }
+                }
+            }
+        }
         //Запись нового элемента
         public string WriteSalesFile(Sales sales, string line)
         {

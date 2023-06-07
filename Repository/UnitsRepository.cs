@@ -33,10 +33,10 @@ namespace Repository
         public void ExecuteUnits(Units units)
         {
             CheckUnitsID();
-            WriteUnitsFile(units);
+            WriteUnitsToFile(units);
         }
         //Запись нового элемента
-        private void WriteUnitsFile(Units units)
+        private void WriteUnitsToFile(Units units)
         {
             units.UnitsID = Counter;
             try

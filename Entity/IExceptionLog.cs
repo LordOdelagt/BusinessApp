@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Entity
 {
-    public class Units : Product
+    public interface IExceptionLog
     {
-        public int UnitsID { get; set; }
-        public string UnitsName { get; set; }
+        void Log(string message);
     }
 }
