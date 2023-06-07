@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Entity
 {
-    public class Units : Product
+    public abstract class Common
     {
-        public int UnitsID { get; set; }
-        public string UnitsName { get; set; }
+        readonly public string Delimiter = ";";
+        public abstract string ToCsv();
     }
 }
