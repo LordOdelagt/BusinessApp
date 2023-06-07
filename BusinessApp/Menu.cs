@@ -28,7 +28,7 @@ namespace BusinessApp
             string input = Console.ReadLine();
             switch (input)
             {
-                case "1"://Создать новый Goods 
+                case "1"://Создать новый Goods
                     bool FromSales = false;
                     Goods goods = new Goods();
                     StartGoodsExecution();
