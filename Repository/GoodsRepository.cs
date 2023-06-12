@@ -11,14 +11,18 @@ namespace Repository
     public class GoodsRepository : IGoodsRepository
     {
         private static int Counter = 0;
-        readonly public string FilePath = "Data/GoodsData.csv";
+
         readonly IExceptionLog warningnMessage;
+
+        public string FilePath => "Data/GoodsData.csv";
+
         //Конструкция для сообщения об ошибке
         public GoodsRepository(IExceptionLog warningMessage)
         {
             this.warningnMessage = warningMessage;
         }
         //Начало работы с Goods
+        //
         
         //Запись нового элемента
         public Goods CreateGoods(string name)
@@ -28,7 +32,7 @@ namespace Repository
             {
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
                 {
-                    writer.Write($"\n{goods.ToCsv()}");
+                    writer.Write($"\n{goods.ToString()}");
                 }
                 Counter++;
             }
@@ -57,27 +61,27 @@ namespace Repository
         //Возвращает GoodsName по GoodsID
         public Goods SearchGoodsByID(int id)
         {
-            if (goods.Id > 0)
+            if (id > 0)
             {
                 int i = 0;
                 using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
                 {
                     while (!reader.EndOfStream)
                     {
-                        
                         string line = reader.ReadLine();
                         string[] values = line.Split(';');
-                        if (i == goods.Id)
+                        if (i == id)
                         {
-                            goods.Name = values[1];
-                            break;
+                            string name = values[1];
+                            return new Goods { Id = id, Name = name };
                         }
                         i++;
                     }
                 }
             }
+            return null;
         }
-        //Проверка на совпадения
+        //Возравщение обьекта Goods по имени 
         public Goods GetGoodsByName(string? name)
         {
             using (StreamReader reader = new StreamReader(FilePath))
@@ -85,6 +89,11 @@ namespace Repository
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
+                    //Goods goods = (Goods)Product.GetFromCsv(line, name);
+                    //if (goods != null)
+                    //{
+                    //    return goods;
+                    //}
                     string[] values = line.Split(';');
                     if (values[1].Equals(name, StringComparison.InvariantCultureIgnoreCase)) //перепроверка второго элемента масива, который является именем 
                     {

@@ -23,9 +23,9 @@ namespace Entity
             Quantity = this.SalesQuantity;
             Price = this.SalesPrice;
         }
-        public override string ToCsv()
+        public override string ToString()
         {
-            throw new NotImplementedException();
+            return SalesID.ToString() + Delimiter + Name; 
         }
     }
 }

@@ -11,7 +11,8 @@ namespace BusinessApp
 {
     public class Menu
     {
-        GoodsRepository goodsRepository = new GoodsRepository(new ExceptionLogToConsole());
+        //GoodsRepository goodsRepository1 = new GoodsRepository(new ExceptionLogToConsole());//временное решение
+        IGoodsRepository goodsRepository = new GoodsRepository(new ExceptionLogToConsole());
         UnitsRepository unitsRepository = new UnitsRepository(Console.WriteLine);
         SalesRepository salesRepository = new SalesRepository(Console.WriteLine);
         public void StartMenu()
@@ -29,8 +30,6 @@ namespace BusinessApp
             switch (input)
             {
                 case "1"://Создать новый Goods
-                    bool FromSales = false;
-                    Goods goods = new Goods();
                     StartGoodsExecution();
                     StartMenu();
                     break;
@@ -38,24 +37,23 @@ namespace BusinessApp
                     ReadGoodsFile();
                     StartMenu();
                     break;
-                case "3":
-                    FromSales = false;
-                    Units units = new Units();
-                    StartUnitsExecution(units, FromSales);
-                    StartMenu();
-                    break;
-                case "4":
-                    ReadUnitsFile();
-                    StartMenu();
-                    break;
-                case "5":
-                    CreateNewSales();
-                    StartMenu();
-                    break;
-                case "6":
-                    ReadSalesFile();
-                    StartMenu();
-                    break;
+                //case "3":
+                //    Units units = new Units();
+                //    StartUnitsExecution(units);
+                //    StartMenu();
+                //    break;
+                //case "4":
+                //    ReadUnitsFile();
+                //    StartMenu();
+                //    break;
+                //case "5":
+                //    CreateNewSales();
+                //    StartMenu();
+                //    break;
+                //case "6":
+                //    ReadSalesFile();
+                //    StartMenu();
+                //    break;
                 default:
                     Console.WriteLine("There's no such option! Please try again");
                     Console.WriteLine("\n");
@@ -68,7 +66,7 @@ namespace BusinessApp
         private void StartGoodsExecution()
         {
             bool exist = true;
-            string? name = EnterGoodsName();
+            string? name = EnterName();
             var goods = goodsRepository.GetGoodsByName(name);
             if (goods == null)
             {
@@ -87,16 +85,16 @@ namespace BusinessApp
             }
         }
         //Запуск работы c Goods из Sales
-        public void StartGoodsExecutionFromSales(Goods goods)
-        {
-            bool exist = false;
-            exist = goodsRepository.GoodsRepositoryExectution(goods, exist);
-            if (exist == false)//Такой Goods не существует, создаем новый и продолжаем
-            {
-                Console.WriteLine($"{goods.Name} doesn't exist in the database. Creating new product...\n");
-            }
-                //Или такой Goods существует, продолжаем
-        }
+        //public void StartGoodsExecutionFromSales(Goods goods)
+        //{
+        //    bool exist = false;
+        //    exist = goodsRepository.GoodsRepositoryExectution(goods, exist);
+        //    if (exist == false)//Такой Goods не существует, создаем новый и продолжаем
+        //    {
+        //        Console.WriteLine($"{goods.Name} doesn't exist in the database. Creating new product...\n");
+        //    }
+        //        //Или такой Goods существует, продолжаем
+        //}
         //Такой Goods уже существует
         public void GoodsMatchCheckTrue(string name)
         {
@@ -105,7 +103,7 @@ namespace BusinessApp
             switch (input)
             {
                 case "y":
-                    bool FromSales = false;
+                    //bool FromSales = false;
                     StartGoodsExecution();
                     break;
                 case "n":
@@ -143,7 +141,7 @@ namespace BusinessApp
             Console.Clear();
         }
         //Запуск работы c Units
-        private void StartUnitsExecution(Units units, bool FromSales)
+        private void StartUnitsExecution(Units units)
         {
             bool exist = false;
             EnterUnitsName(units);
@@ -179,7 +177,7 @@ namespace BusinessApp
             {
                 case "y":
                     bool FromSales = false;
-                    StartUnitsExecution(units, FromSales);
+                    StartUnitsExecution(units);
                     break;
                 case "n":
                     Console.Clear();
@@ -298,7 +296,7 @@ namespace BusinessApp
         {
             string buffer;
             Goods goods = new Goods();
-            StartGoodsExecutionFromSales(goods);
+            //StartGoodsExecutionFromSales(goods);
             sales.SalesGoodsID = goods.Id;
             buffer = Convert.ToString(sales.SalesGoodsID);
             buffer += ";";
@@ -386,10 +384,15 @@ namespace BusinessApp
             readResult += buffer;
             return readResult;
         }
-        private string? EnterGoodsName()
+        private string? EnterName()
         {
             Console.Write("Enter the name of product: ");
             return Console.ReadLine();
+        }
+        private int EnterId()
+        {
+            Console.Write("Enter the Id: ");
+            return Convert.ToInt32(Console.ReadLine());
         }
         public void EnterUnitsName(Units units)
         {
