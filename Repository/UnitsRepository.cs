@@ -7,53 +7,19 @@ using System.Threading.Tasks;
 
 namespace Repository
 {
-    public class UnitsRepository
+    public class UnitsRepository : IUnitsRepository
     {
         private static int Counter = 0;
-        readonly public string FilePath = "Data/UnitsData.csv";
-        readonly Action<string> warningnMessage;
+        public string FilePath => "Data/UnitsData.csv";
+        readonly IExceptionLog warningnMessage;
+
         //Конструкция для сообщения об ошибке
-        public UnitsRepository(Action<string> warningMessage)
+        public UnitsRepository(IExceptionLog warningMessage)
         {
             this.warningnMessage = warningMessage;
         }
-        public bool UnitsRepositoryExectution(Units units, bool exist)
-        {
-            if (UnitsMatchCheck(units) == false)
-            {
-                ExecuteUnits(units);
-                return exist;
-            }
-            else
-            {
-                exist = true;
-                return exist;
-            }
-        }
-        public void ExecuteUnits(Units units)
-        {
-            CheckUnitsID();
-            WriteUnitsToFile(units);
-        }
-        //Запись нового элемента
-        private void WriteUnitsToFile(Units units)
-        {
-            units.UnitsID = Counter;
-            try
-            {
-                using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
-                {
-                    writer.Write($"\n{units.UnitsID};{units.UnitsName}");
-                }
-                Counter++;
-            }
-            catch (IOException e)
-            {
-                warningnMessage("An error occurred while creating the CSV file: " + e.Message);
-            }
-        }
         //Получение количества строк. ID будущего элемента = Counter. 
-        private void CheckUnitsID()
+        private int CheckUnitsID()
         {
             if (Counter == 0)
             {
@@ -65,48 +31,72 @@ namespace Repository
                     }
                 }
             }
+            return Counter;
         }
-        public void SearchUnitsByID(Units units)
+        public Units CreateUnits(string? name)
         {
-            if (units.UnitsID > 0)
+            var units = new Units { Id = CheckUnitsID(), Name = name };
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
+                {
+                    writer.Write($"\n{units.ToString()}");
+                }
+                Counter++;
+            }
+            catch (IOException e)
+            {
+                warningnMessage.Log("An error occurred while creating the CSV file: " + e.Message);
+                throw new IOException();
+            }
+            return units;
+        }
+        public Units SearchUnitsByID(int id)
+        {
+            if (id > 0)
             {
                 int i = 0;
                 using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
                 {
                     while (!reader.EndOfStream)
                     {
-                        
                         string line = reader.ReadLine();
                         string[] values = line.Split(';');
-                        if (i == units.UnitsID)
+                        if (i == id)
                         {
-                            units.UnitsName = values[1];
-                            break;
+                            string name = values[(int)ProductEnum.Name];
+                            return new Units { Id = id, Name = name };
                         }
                         i++;
                     }
                 }
             }
+            return null;
         }
-        //Проверка на совпадения
-        public bool UnitsMatchCheck(Units units, bool exist = false)
+
+        public Units GetUnitsByName(string? name)
         {
             using (StreamReader reader = new StreamReader(FilePath))
             {
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
+                    //Units units = (Units)Product.GetFromCsv(line, name);
+                    //if (units != null)
+                    //{
+                    //    return units;
+                    //}
                     string[] values = line.Split(';');
-                    if (values[1].Contains(units.UnitsName)) //перепроверка второго элемента масива, который является именем 
+                    if (values[(int)ProductEnum.Name].Equals(name, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        units.UnitsID = Convert.ToInt32(values[0]);
-                        exist = true;
-                        break;
+                        int id = Convert.ToInt32(values[(int)ProductEnum.Id]);
+                        return new Units { Id = id, Name = name };
                     }
                 }
             }
-            return exist;
+            return null;
         }
 
+        
     }
 }

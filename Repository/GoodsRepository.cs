@@ -72,7 +72,7 @@ namespace Repository
                         string[] values = line.Split(';');
                         if (i == id)
                         {
-                            string name = values[1];
+                            string name = values[(int)ProductEnum.Name];
                             return new Goods { Id = id, Name = name };
                         }
                         i++;
@@ -95,9 +95,9 @@ namespace Repository
                     //    return goods;
                     //}
                     string[] values = line.Split(';');
-                    if (values[1].Equals(name, StringComparison.InvariantCultureIgnoreCase)) //перепроверка второго элемента масива, который является именем 
+                    if (values[(int)ProductEnum.Name].Equals(name, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        int id = Convert.ToInt32(values[0]);
+                        int id = Convert.ToInt32(values[(int)ProductEnum.Id]);
                         return new Goods { Id = id, Name = name };
                     }
                 }

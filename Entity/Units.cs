@@ -8,7 +8,5 @@ namespace Entity
 {
     public class Units : Product
     {
-        public int UnitsID { get; set; }
-        public string UnitsName { get; set; }
     }
 }

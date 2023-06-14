@@ -25,7 +25,9 @@ namespace Entity
         }
         public override string ToString()
         {
-            return SalesID.ToString() + Delimiter + Name; 
+            return SalesID.ToString() + Delimiter + SalesGoodsID
+                + Delimiter + SalesUnitsID + Delimiter + SalesQuantity
+                + Delimiter + SalesPrice; 
         }
     }
 }

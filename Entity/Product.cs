@@ -9,7 +9,7 @@ namespace Entity
 {
     public class Product : Common
     {
-        public string Name { get; set; }   
+        public string? Name { get; set; }   
         public int Id { get; set; }
 
         public override string ToString()
