@@ -21,9 +21,6 @@ namespace Repository
         {
             this.warningnMessage = warningMessage;
         }
-        //Начало работы с Goods
-        //
-        
         //Запись нового элемента
         public Goods CreateGoods(string name)
         {

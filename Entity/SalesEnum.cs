@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Entity
 {
-    public abstract class Common
+    public enum SalesEnum
     {
-        readonly public string Delimiter = ";";
-        public abstract string ToString();
+        Id,
+        GoodsId,
+        UnitsId,
+        Quantity,
+        Price
     }
 }

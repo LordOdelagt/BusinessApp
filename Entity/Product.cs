@@ -26,5 +26,17 @@ namespace Entity
             }
             return null;
         }
+        //Мой вариант 
+        public static Product GetFromCsv1(string line)
+        {
+            if (line != null)
+            {
+                string[] values = line.Split(';');
+                int id = Convert.ToInt32(values[(int)ProductEnum.Id]);
+                string name = Convert.ToString(values[(int)ProductEnum.Name]);
+                return new Product { Id = id, Name = name };
+            }
+            return null;
+        }
     }
 }
