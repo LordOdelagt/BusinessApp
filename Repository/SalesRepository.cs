@@ -19,45 +19,47 @@ namespace Repository
         //Получаем ID будущей покупки
         public int CheckSalesID()
         {
-                if (Counter == 0)
+            if (Counter == 0)
+            {
+                using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
                 {
-                    using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
+                    while (reader.ReadLine() != null)
                     {
-                        while (reader.ReadLine() != null)
-                        {
-                            Counter++;
-                        }
+                        Counter++;
                     }
+                    Counter++;
                 }
+            }
             return Counter;
         }
         public Sales SearchSalesByID(int id)
         {
-                using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
+            using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
+            {
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    string line = reader.ReadLine();
+                    Sales sales = GetFromString(line);
+                    if (sales.SalesId == id)
                     {
-                        string line = reader.ReadLine();
-                        Sales sales = GetFromString(line);
-                        if (sales.SalesId == id)
-                        {
-                            return sales;
-                        }
+                        return sales;
                     }
                 }
+            }
             return null;
         }
         //Временное решение?
         //Будет дополняться по мере добавления новых Entity
-        public Sales CreateSales(Goods goods, Units units, int quantity)
+        public Sales CreateSales(Goods goods, Units units, Price price, int quantity)
         {
             //Потенциально надо как-то упростить 
-            var sales = new Sales 
-            { 
-                SalesId = CheckSalesID(), 
-                SalesGoodsId = goods.Id, 
-                SalesUnitsId = units.Id, 
-                SalesQuantity = quantity
+            var sales = new Sales
+            {
+                SalesId = CheckSalesID(),
+                SalesGoodsId = goods.Id,
+                SalesUnitsId = units.Id,
+                SalesQuantity = quantity,
+                SalesPrice = price.PriceTotal * quantity
             };
             try
             {
@@ -90,6 +92,7 @@ namespace Repository
             return list;
         }
 
+
         public Sales GetFromString(string line)
         {
             if (line != null)
@@ -100,7 +103,8 @@ namespace Repository
                     SalesId = Convert.ToInt32(values[(int)SalesEnum.Id]),
                     SalesGoodsId = Convert.ToInt32(values[(int)SalesEnum.GoodsId]),
                     SalesUnitsId = Convert.ToInt32(values[(int)SalesEnum.UnitsId]),
-                    SalesQuantity = Convert.ToInt32(values[(int)SalesEnum.Quantity])
+                    SalesQuantity = Convert.ToInt32(values[(int)SalesEnum.Quantity]),
+                    SalesPrice = Convert.ToDecimal(values[(int)SalesEnum.Price])
                 };
             }
             return null;

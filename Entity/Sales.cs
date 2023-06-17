@@ -13,11 +13,12 @@ namespace Entity
         public int SalesGoodsId { get; set; }
         public int SalesUnitsId { get; set; }
         public int SalesQuantity { get; set; }
-        //public decimal SalesPrice { get; set; }
+        public decimal SalesPrice { get; set; }
         public string ToString()
         {
-            return SalesId.ToString() + Delimiter + SalesGoodsId
-                + Delimiter + SalesUnitsId + Delimiter + SalesQuantity; 
+            return SalesId + Delimiter + SalesGoodsId
+                + Delimiter + SalesUnitsId + Delimiter + SalesQuantity
+                + Delimiter + SalesPrice; 
         }
     }
 }

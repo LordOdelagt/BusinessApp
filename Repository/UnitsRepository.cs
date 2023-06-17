@@ -29,6 +29,7 @@ namespace Repository
                     {
                         Counter++;
                     }
+                    Counter++;
                 }
             }
             return Counter;
@@ -38,6 +39,7 @@ namespace Repository
             var units = new Units { Id = CheckUnitsID(), Name = name };
             try
             {
+                Counter++;
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
                 {
                     writer.Write($"\n{units.ToString()}");

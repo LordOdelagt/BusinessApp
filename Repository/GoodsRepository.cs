@@ -51,6 +51,7 @@ namespace Repository
                     {
                         Counter++;
                     }
+                    Counter++;
                 }
             }
             return Counter;
@@ -112,8 +113,6 @@ namespace Repository
             if (line != null)
             {
                 string[] values = line.Split(Delimiter);
-                int id = Convert.ToInt32(values[(int)ProductEnum.Id]);
-                string name = values[(int)ProductEnum.Name];
                 return new Goods 
                 {
                     Id = Convert.ToInt32(values[(int)ProductEnum.Id]),

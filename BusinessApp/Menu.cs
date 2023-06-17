@@ -14,6 +14,7 @@ namespace BusinessApp
         IGoodsRepository goodsRepository = new GoodsRepository(new ExceptionLogToConsole());
         IUnitsRepository unitsRepository = new UnitsRepository(new ExceptionLogToConsole());
         ISalesRepository salesRepository = new SalesRepository(new ExceptionLogToConsole());
+        IPriceRepository priceRepository = new PriceRepository(new ExceptionLogToConsole());
         public void StartMenu()
         {
             Console.Clear();
@@ -33,7 +34,11 @@ namespace BusinessApp
                     StartMenu();
                     break;
                 case "2"://Считать Goods
+                    Console.Clear();
                     ReadGoodsFile();
+                    Console.WriteLine("Press Enter to return...");
+                    Console.ReadLine();
+                    Console.Clear();
                     StartMenu();
                     break;
                 case "3":
@@ -41,7 +46,11 @@ namespace BusinessApp
                     StartMenu();
                     break;
                 case "4":
+                    Console.Clear();
                     ReadUnitsFile();
+                    Console.WriteLine("Press Enter to return...");
+                    Console.ReadLine();
+                    Console.Clear();
                     StartMenu();
                     break;
                 case "5":
@@ -49,11 +58,21 @@ namespace BusinessApp
                     StartMenu();
                     break;
                 case "6":
+                    Console.Clear();
                     ReadSalesFile();
                     StartMenu();
                     break;
                 case "7":
-                    int i = EnterInt();
+                    StartPriceExecution();
+                    StartMenu();
+                    break;
+                case "8":
+                    Console.Clear();
+                    ReadPriceFile();
+                    Console.WriteLine("Press Enter to return...");
+                    Console.ReadLine();
+                    Console.Clear();
+                    StartMenu();
                     break;
                 default:
                     Console.WriteLine("There's no such option! Please try again. Press Enter to continue...");
@@ -67,7 +86,7 @@ namespace BusinessApp
         private void StartGoodsExecution()
         {
             bool exist = true;
-            Console.Write("Enter the name of Goods");
+            Console.WriteLine("Enter the name of Goods: ");
             string? name = EnterName();
             var goods = goodsRepository.GetGoodsByName(name);
             if (goods == null)
@@ -93,7 +112,6 @@ namespace BusinessApp
             switch (input)
             {
                 case "y":
-                    //bool FromSales = false;
                     StartGoodsExecution();
                     break;
                 case "n":
@@ -104,13 +122,12 @@ namespace BusinessApp
         //Читает информацию с файла Goods.
         private void ReadGoodsFile()
         {
-            Console.Clear();
             Console.WriteLine("The existing positions are: \n");
             try
             {
                 foreach (var item in goodsRepository.GetGoods())
                 {
-                    Console.Write($"{item} \t");
+                    Console.WriteLine($"{item} \t");
                 }
                 Console.WriteLine();
             }
@@ -118,15 +135,13 @@ namespace BusinessApp
             {
                 Console.WriteLine("An error occurred while reading the CSV file: " + e.Message);
             }
-            Console.WriteLine("\nPress Enter to return...");
-            Console.ReadLine();
-            Console.Clear();
         }
 
         //Запуск работы c Units
         private void StartUnitsExecution()
         {
             bool exist = true;
+            Console.WriteLine("Enter the name of Units: ");
             string? name = EnterName();
             var units = unitsRepository.GetUnitsByName(name);
             if (units == null)
@@ -162,13 +177,12 @@ namespace BusinessApp
         //Читает информацию с файла Units
         private void ReadUnitsFile()
         {
-            Console.Clear();
             Console.WriteLine("The existing positions are: \n");
             try
             {
                 foreach (var item in unitsRepository.GetUnits())
                 {
-                    Console.Write($"{item} \t");
+                    Console.WriteLine($"{item} \t");
                 }
                 Console.WriteLine();
             }
@@ -176,35 +190,33 @@ namespace BusinessApp
             {
                 Console.WriteLine("An error occurred while reading the CSV file: " + e.Message);
             }
-            Console.WriteLine("\nPress Enter to return...");
-            Console.ReadLine();
-            Console.Clear();
-        }
 
+        }
         private void StartSalesExecution()
         {
-            Console.WriteLine("Enter the name of goods:");
-            string? name = EnterName();
-            var goods = goodsRepository.GetGoodsByName(name);
-            if (goods == null)
+            var goods = PickGoodsById();
+            var units = PickUnitsById();
+
+
+            var price = priceRepository.SearchPriceByMatch(goods, units);
+            if (price == null)
             {
-                Console.WriteLine($"{name} doesn't exist in the database. Adding to database...\n");
-                goods = goodsRepository.CreateGoods(name);
+                Console.Clear();
+                Console.WriteLine($"There's no price set for {units.Name} {goods.Name}.");
+                Console.Write("Please, enter the price: ");
+                decimal total = EnterDecimal();
+                price = priceRepository.CreatePrice(goods, units, total);
             }
-            Console.WriteLine("Enter the type of goods:");
-            name = EnterName();
-            var units = unitsRepository.GetUnitsByName(name);
-            if (units == null)
-            {
-                Console.WriteLine($"{name} doesn't exist in the database. Adding to database...\n");
-                units = unitsRepository.CreateUnits(name);
-            }
+
+
             Console.WriteLine("Enter quantity:");
             int quantity = EnterInt();//Done: Сделать функцию на проверку на буквы, null etc.
-            var sales = salesRepository.CreateSales(goods, units, quantity);
+
+
+            var sales = salesRepository.CreateSales(goods, units, price, quantity);
             if (sales != null)
             {
-                Console.WriteLine("\nPosition created successfully!\n Press Enter to continue...");
+                Console.WriteLine($"\nSale created successfully as id: {sales.SalesId}!\n Press Enter to continue...");
             }
             else 
                 Console.WriteLine("Something went wrong...");
@@ -213,15 +225,27 @@ namespace BusinessApp
         }
         private void ReadSalesFile()
         {
-            Console.Clear();
-            Console.WriteLine("The existing positions are: \n");
+            Console.WriteLine("Sales database: \n");
             try
             {
                 foreach (var item in salesRepository.GetSales())
                 {
-                    Console.Write($"{item} \t");
+                    int id = item.SalesGoodsId;
+                    var goods = goodsRepository.SearchGoodsByID(id);
+                    id = item.SalesUnitsId;
+                    var units = unitsRepository.SearchUnitsByID(id);
+
+                    //Проверка чтения
+                    Console.Write($"{item.SalesId}.");
+                    Console.Write($"   ");
+                    if (item.SalesQuantity > 1)
+                    {
+                        Console.Write($"{item.SalesQuantity} {units.Name} {goods.Name}s for {item.SalesPrice}$");
+                    }
+                    else
+                        Console.Write($"{item.SalesQuantity} {units.Name} {goods.Name} for {item.SalesPrice}$");
+                    Console.WriteLine();
                 }
-                Console.WriteLine();
             }
             catch (IOException e)
             {
@@ -231,11 +255,52 @@ namespace BusinessApp
             Console.ReadLine();
             Console.Clear();
         }
-        
+        private void StartPriceExecution()
+        {
+            var goods = PickGoodsById();
+            var units = PickUnitsById();
+
+            Console.Write($"The total price of {units.Name} {goods.Name}: ");
+            decimal total = EnterDecimal();
+            var price = priceRepository.CreatePrice(goods, units, total);
+            if (price != null)
+            {
+                Console.WriteLine("\nPrice set successfully!\n Press Enter to continue...");
+            }
+            else
+                Console.WriteLine("Something went wrong...");
+            Console.ReadLine();
+            Console.Clear();
+        }
+        private void ReadPriceFile()
+        {
+            Console.WriteLine("The existing positions are: \n");
+            try
+            {
+                foreach (var item in priceRepository.GetPrices())
+                {
+                    int id = item.PriceGoodsId;
+                    var goods = goodsRepository.SearchGoodsByID(id);
+                    id = item.PriceUnitsId;
+                    var units = unitsRepository.SearchUnitsByID(id);
+                    //Проверка чтения
+                    Console.Write($"{item.PriceId}.");
+                    Console.Write($"   ");
+                    Console.Write($"{units.Name} {goods.Name} is {item.PriceTotal}$");
+                    Console.WriteLine();
+                }
+                Console.WriteLine();
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine("An error occurred while reading the CSV file: " + e.Message);
+            }
+        }
+
         private string EnterName()
         {
             //TODO: сделать проверку на null (while). Чтобы не было пробелов. Протестить
-            Console.Write(" - ");
+            //Console.Write(" - ");
             string? name = Console.ReadLine();
             while (string.IsNullOrEmpty(name?.Trim()))
             {
@@ -245,14 +310,63 @@ namespace BusinessApp
             }
             return name;
         }
+
+        private Goods PickGoodsById()
+        {
+            Console.Clear();
+            Console.WriteLine("Pick the product from database.\n");
+            ReadGoodsFile();
+            Console.Write("Enter the id: ");
+            int id = EnterInt();
+            Goods goods = goodsRepository.SearchGoodsByID(id);
+            while (goods == null)
+            {
+                ClearLine();
+                Console.WriteLine($"The product with id {id} doesn't exist in the database. Try again.\n");
+                Console.Write("Enter the id: ");
+                id = EnterInt();
+                goods = goodsRepository.SearchGoodsByID(id);
+            }
+            return goods;
+        }
+
+        private Units PickUnitsById()
+        {
+            Console.Clear();
+            Console.WriteLine($"Pick the condition of product from database.\n");
+            ReadUnitsFile();
+            Console.Write("Enter the id: ");
+            int id = EnterInt();
+            var units = unitsRepository.SearchUnitsByID(id);
+            while (units == null)
+            {
+                ClearLine();
+                Console.WriteLine($"The type of product with id {id} doesn't exist in the database. Try again.\n");
+                Console.Write("Enter the id: ");
+                id = EnterInt();
+                units = unitsRepository.SearchUnitsByID(id);
+            }
+            return units;
+        }
         private int EnterInt()
         {
-            Console.Write(" - ");
+            //Console.Write(" - ");
             int i = 0;
             while (!int.TryParse(Console.ReadLine(), out i) || int.Equals(i, 0) || i == null)
             {
                 ClearLine();
-                Console.Write("This is not valid input. Please try again: - ");
+                Console.Write("This is not valid input. Please try again: ");
+            }
+            return i;
+        }
+        private decimal EnterDecimal()
+        {
+            //Console.Write(" - ");
+            decimal i = 0;
+            while (!decimal.TryParse(Console.ReadLine(), out i) || i == null)
+            {
+                ClearLine();
+                Console.Write("This is not valid input. Please try again: ");
             }
             return i;
         }
