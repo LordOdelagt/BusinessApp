@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Repository
 {
-    public class GoodsRepository : IGoodsRepository
+    public class GoodsRepository : Common, IGoodsRepository
     {
         private static int Counter = 0;
 
@@ -55,24 +55,19 @@ namespace Repository
             }
             return Counter;
         }
-        //Возвращает GoodsName по GoodsID
+        //Возвращает объект Goods по введенному id
         public Goods SearchGoodsByID(int id)
         {
-            if (id > 0)
+
+            using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
             {
-                int i = 0;
-                using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
+                while (!reader.EndOfStream)
                 {
-                    while (!reader.EndOfStream)
+                    string line = reader.ReadLine();
+                    Goods goods = GetFromString(line);//теперь работает через getfromString
+                    if (goods.Id == id)
                     {
-                        string line = reader.ReadLine();
-                        string[] values = line.Split(';');
-                        if (i == id)
-                        {
-                            string name = values[(int)ProductEnum.Name];
-                            return new Goods { Id = id, Name = name };
-                        }
-                        i++;
+                        return goods; //Было через return new Goods. Исправлено 
                     }
                 }
             }
@@ -86,22 +81,46 @@ namespace Repository
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    //Goods goods = (Goods)Product.GetFromCsv(line, name);
-                    //if (goods != null)
-                    //{
-                    //    return goods;
-                    //}
-                    string[] values = line.Split(';');
-                    if (values[(int)ProductEnum.Name].Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                    Goods goods = GetFromString(line);
+                    string goodsName = goods.Name;
+                    if (goodsName.Equals(name, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        int id = Convert.ToInt32(values[(int)ProductEnum.Id]);
-                        return new Goods { Id = id, Name = name };
+                        return goods;
                     }
                 }
             }
             return null;
         }
 
-        
+        public List<Goods> GetGoods()
+        {
+            List<Goods> list = new List<Goods>();
+            using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    Goods goods = GetFromString(line);
+                    list.Add(goods);
+                }
+            }
+            return list;
+        }
+        //Поменял название с GetFromCsv на GetFromString
+        public Goods GetFromString(string line)
+        {
+            if (line != null)
+            {
+                string[] values = line.Split(Delimiter);
+                int id = Convert.ToInt32(values[(int)ProductEnum.Id]);
+                string name = values[(int)ProductEnum.Name];
+                return new Goods 
+                {
+                    Id = Convert.ToInt32(values[(int)ProductEnum.Id]),
+                    Name = Convert.ToString(values[(int)ProductEnum.Name])
+                };
+            }
+            return null;
+        }
     }
 }

@@ -16,18 +16,18 @@ namespace Entity
         {
             return Id.ToString() + Delimiter + Name;
         }
-        public static Product GetFromCsv(string line, string name)
-        {
-            string[] values = line.Split(';');
-            if (values[(int)ProductEnum.Name].Equals(name, StringComparison.InvariantCultureIgnoreCase))
-            {
-                int id = Convert.ToInt32(values[(int)ProductEnum.Id]);
-                return new Product { Id = id, Name = name };
-            }
-            return null;
-        }
+        //public static Product GetFromCsv(string line, string name)
+        //{
+        //    string[] values = line.Split(';');
+        //    if (values[(int)ProductEnum.Name].Equals(name, StringComparison.InvariantCultureIgnoreCase))
+        //    {
+        //        int id = Convert.ToInt32(values[(int)ProductEnum.Id]);
+        //        return new Product { Id = id, Name = name };
+        //    }
+        //    return null;
+        //}
         //Мой вариант 
-        public static Product GetFromCsv1(string line)
+        public Product GetFromCsv(string line)
         {
             if (line != null)
             {

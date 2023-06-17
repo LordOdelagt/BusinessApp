@@ -14,5 +14,7 @@ namespace Repository
         Units SearchUnitsByID(int id);
         Units GetUnitsByName(string? name);
         Units CreateUnits(string? name);
+        List<Units> GetUnits();
+        Units GetFromString(string line);
     }
 }

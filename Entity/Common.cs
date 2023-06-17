@@ -10,6 +10,6 @@ namespace Entity
     public abstract class Common
     {
         readonly public string Delimiter = ";";
-        public abstract string ToString();
+        //public abstract string ToString();
     }
 }

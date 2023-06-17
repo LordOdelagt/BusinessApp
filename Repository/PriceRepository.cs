@@ -4,14 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Entity
+namespace Repository
 {
-    public enum SalesEnum
+    internal interface PriceRepository
     {
-        Id,
-        GoodsId,
-        UnitsId,
-        Quantity,
-        PriceId
     }
 }

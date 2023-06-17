@@ -14,5 +14,7 @@ namespace Repository
         Goods SearchGoodsByID(int id);
         Goods GetGoodsByName(string? name);
         Goods CreateGoods(string name);
+        List<Goods> GetGoods();
+        Goods GetFromString(string line);
     }
 }

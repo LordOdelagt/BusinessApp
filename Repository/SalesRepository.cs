@@ -8,16 +8,14 @@ using Entity;
 
 namespace Repository
 {
-    public class SalesRepository : ISalesRepository
+    public class SalesRepository : Common, ISalesRepository
     {
         private static int Counter = 0;
         public string FilePath => "Data/SalesData.csv";
+
         readonly IExceptionLog warningnMessage;
         //Конструкция для сообщения об ошибке
-        public SalesRepository(IExceptionLog warningMessage)
-        {
-            this.warningnMessage = warningMessage;
-        }
+        public SalesRepository(IExceptionLog warningMessage) => this.warningnMessage = warningMessage;
         //Получаем ID будущей покупки
         public int CheckSalesID()
         {
@@ -35,36 +33,32 @@ namespace Repository
         }
         public Sales SearchSalesByID(int id)
         {
-            if (id > 0)
-            {
                 using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
                 {
-                    int i = 0;
                     while (!reader.EndOfStream)
                     {
                         string line = reader.ReadLine();
-                        string[] values = line.Split(';');
-                        if (i == id)
+                        Sales sales = GetFromString(line);
+                        if (sales.SalesId == id)
                         {
-                            //Потенциально надо как-то упростить
-                            return new Sales 
-                            { 
-                                SalesId = id, 
-                                SalesGoodsId = Convert.ToInt32(values[(int)SalesEnum.GoodsId]),
-                                SalesUnitsId = Convert.ToInt32(values[(int)SalesEnum.UnitsId]),
-                                SalesQuantity = Convert.ToInt32(values[(int)SalesEnum.Quantity]),
-                            };
+                            return sales;
                         }
-                        i++;
                     }
                 }
-            }
             return null;
         }
-        public Sales CreateSales(int goodsId, int unitsId, int quantity)
+        //Временное решение?
+        //Будет дополняться по мере добавления новых Entity
+        public Sales CreateSales(Goods goods, Units units, int quantity)
         {
             //Потенциально надо как-то упростить 
-            var sales = new Sales { SalesId = CheckSalesID(), SalesGoodsId = goodsId, SalesUnitsId = unitsId, SalesQuantity = quantity};
+            var sales = new Sales 
+            { 
+                SalesId = CheckSalesID(), 
+                SalesGoodsId = goods.Id, 
+                SalesUnitsId = units.Id, 
+                SalesQuantity = quantity
+            };
             try
             {
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
@@ -76,9 +70,40 @@ namespace Repository
             catch (IOException e)
             {
                 warningnMessage.Log("An error occurred while creating the CSV file: " + e.Message);
-                throw new IOException();
+                return null;
             }
             return sales;
+        }
+
+        public List<Sales> GetSales()
+        {
+            List<Sales> list = new List<Sales>();
+            using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    Sales sales = GetFromString(line);
+                    list.Add(sales);//Нужно ли тут добавить перепроверку на null?
+                }
+            }
+            return list;
+        }
+
+        public Sales GetFromString(string line)
+        {
+            if (line != null)
+            {
+                string[] values = line.Split(Delimiter);
+                return new Sales
+                {
+                    SalesId = Convert.ToInt32(values[(int)SalesEnum.Id]),
+                    SalesGoodsId = Convert.ToInt32(values[(int)SalesEnum.GoodsId]),
+                    SalesUnitsId = Convert.ToInt32(values[(int)SalesEnum.UnitsId]),
+                    SalesQuantity = Convert.ToInt32(values[(int)SalesEnum.Quantity])
+                };
+            }
+            return null;
         }
     }
 }

@@ -11,6 +11,9 @@ namespace Repository
     public interface ISalesRepository
     {
         string FilePath { get; }
-        Sales CreateSales(int goodsId, int unitsId, int quantity);
+        Sales CreateSales(Goods goods, Units units, int quantity);
+        Sales SearchSalesByID(int id);
+        List<Sales> GetSales();
+        Sales GetFromString(string line);
     }
 }
