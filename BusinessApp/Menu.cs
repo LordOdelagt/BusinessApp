@@ -11,7 +11,7 @@ namespace BusinessApp
 {
     public class Menu
     {
-        IGoodsRepository goodsRepository = new GoodsRepository(new ExceptionLogToConsole());
+        IGoodsRepository GoodsRepository = new GoodsRepository(new ExceptionLogToConsole());
         IUnitsRepository unitsRepository = new UnitsRepository(new ExceptionLogToConsole());
         ISalesRepository salesRepository = new SalesRepository(new ExceptionLogToConsole());
         IPriceRepository priceRepository = new PriceRepository(new ExceptionLogToConsole());
@@ -88,10 +88,10 @@ namespace BusinessApp
             bool exist = true;
             Console.WriteLine("Enter the name of Goods: ");
             string? name = EnterName();
-            var goods = goodsRepository.GetGoodsByName(name);
-            if (goods == null)
+            var Goods = GoodsRepository.GetGoodsByName(name);
+            if (Goods == null)
             {
-                goodsRepository.CreateGoods(name);
+                GoodsRepository.CreateGoods(name);
                 exist = false;
             }
             if (exist)
@@ -100,7 +100,7 @@ namespace BusinessApp
             }
             else
             {
-                Console.WriteLine("Position created successfully!\n Press Enter to continue...");
+                Console.WriteLine($"Position created successfully as id {Goods.Id}!\n Press Enter to continue...");
                 Console.ReadLine();
                 Console.Clear();
             }
@@ -125,7 +125,7 @@ namespace BusinessApp
             Console.WriteLine("The existing positions are: \n");
             try
             {
-                foreach (var item in goodsRepository.GetGoods())
+                foreach (var item in GoodsRepository.GetGoods())
                 {
                     Console.WriteLine($"{item} \t");
                 }
@@ -155,7 +155,7 @@ namespace BusinessApp
             }
             else
             {
-                Console.WriteLine("Position created successfully!\n Press Enter to continue...");
+                Console.WriteLine($"Position created successfully as id {units.Id}!\n Press Enter to continue...");
                 Console.ReadLine();
                 Console.Clear();
             }
@@ -194,18 +194,18 @@ namespace BusinessApp
         }
         private void StartSalesExecution()
         {
-            var goods = PickGoodsById();
+            var Goods = PickGoodsById();
             var units = PickUnitsById();
 
 
-            var price = priceRepository.SearchPriceByMatch(goods, units);
+            var price = priceRepository.SearchPriceByMatch(Goods, units);
             if (price == null)
             {
                 Console.Clear();
-                Console.WriteLine($"There's no price set for {units.Name} {goods.Name}.");
+                Console.WriteLine($"There's no price set for {units.Name} {Goods.Name}.");
                 Console.Write("Please, enter the price: ");
                 decimal total = EnterDecimal();
-                price = priceRepository.CreatePrice(goods, units, total);
+                price = priceRepository.CreatePrice(Goods, units, total);
             }
 
 
@@ -213,7 +213,7 @@ namespace BusinessApp
             int quantity = EnterInt();//Done: Сделать функцию на проверку на буквы, null etc.
 
 
-            var sales = salesRepository.CreateSales(goods, units, price, quantity);
+            var sales = salesRepository.CreateSales(Goods, units, price, quantity);
             if (sales != null)
             {
                 Console.WriteLine($"\nSale created successfully as id: {sales.SalesId}!\n Press Enter to continue...");
@@ -230,20 +230,18 @@ namespace BusinessApp
             {
                 foreach (var item in salesRepository.GetSales())
                 {
-                    int id = item.SalesGoodsId;
-                    var goods = goodsRepository.SearchGoodsByID(id);
-                    id = item.SalesUnitsId;
-                    var units = unitsRepository.SearchUnitsByID(id);
+                    var Goods = GoodsRepository.SearchGoodsByID(item.SalesGoodsId);
+                    var units = unitsRepository.SearchUnitsByID(item.SalesUnitsId);
 
                     //Проверка чтения
                     Console.Write($"{item.SalesId}.");
                     Console.Write($"   ");
                     if (item.SalesQuantity > 1)
                     {
-                        Console.Write($"{item.SalesQuantity} {units.Name} {goods.Name}s for {item.SalesPrice}$");
+                        Console.Write($"{item.SalesQuantity} {units.Name} {Goods.Name}s for {item.SalesPrice}$");
                     }
                     else
-                        Console.Write($"{item.SalesQuantity} {units.Name} {goods.Name} for {item.SalesPrice}$");
+                        Console.Write($"{item.SalesQuantity} {units.Name} {Goods.Name} for {item.SalesPrice}$");
                     Console.WriteLine();
                 }
             }
@@ -257,12 +255,12 @@ namespace BusinessApp
         }
         private void StartPriceExecution()
         {
-            var goods = PickGoodsById();
+            var Goods = PickGoodsById();
             var units = PickUnitsById();
 
-            Console.Write($"The total price of {units.Name} {goods.Name}: ");
+            Console.Write($"The total price of {units.Name} {Goods.Name}: ");
             decimal total = EnterDecimal();
-            var price = priceRepository.CreatePrice(goods, units, total);
+            var price = priceRepository.CreatePrice(Goods, units, total);
             if (price != null)
             {
                 Console.WriteLine("\nPrice set successfully!\n Press Enter to continue...");
@@ -274,19 +272,19 @@ namespace BusinessApp
         }
         private void ReadPriceFile()
         {
-            Console.WriteLine("The existing positions are: \n");
+            Console.WriteLine("Price sheet: \n");
             try
             {
                 foreach (var item in priceRepository.GetPrices())
                 {
                     int id = item.PriceGoodsId;
-                    var goods = goodsRepository.SearchGoodsByID(id);
+                    var Goods = GoodsRepository.SearchGoodsByID(id);
                     id = item.PriceUnitsId;
                     var units = unitsRepository.SearchUnitsByID(id);
                     //Проверка чтения
                     Console.Write($"{item.PriceId}.");
                     Console.Write($"   ");
-                    Console.Write($"{units.Name} {goods.Name} is {item.PriceTotal}$");
+                    Console.Write($"{units.Name} {Goods.Name} is {item.PriceTotal}$");
                     Console.WriteLine();
                 }
                 Console.WriteLine();
@@ -318,16 +316,16 @@ namespace BusinessApp
             ReadGoodsFile();
             Console.Write("Enter the id: ");
             int id = EnterInt();
-            Goods goods = goodsRepository.SearchGoodsByID(id);
-            while (goods == null)
+            Goods Goods = GoodsRepository.SearchGoodsByID(id);
+            while (Goods == null)
             {
                 ClearLine();
                 Console.WriteLine($"The product with id {id} doesn't exist in the database. Try again.\n");
                 Console.Write("Enter the id: ");
                 id = EnterInt();
-                goods = goodsRepository.SearchGoodsByID(id);
+                Goods = GoodsRepository.SearchGoodsByID(id);
             }
-            return goods;
+            return Goods;
         }
 
         private Units PickUnitsById()
@@ -352,7 +350,7 @@ namespace BusinessApp
         {
             //Console.Write(" - ");
             int i = 0;
-            while (!int.TryParse(Console.ReadLine(), out i) || int.Equals(i, 0) || i == null)
+            while (!int.TryParse(Console.ReadLine(), out i) || i==0)
             {
                 ClearLine();
                 Console.Write("This is not valid input. Please try again: ");
@@ -363,7 +361,7 @@ namespace BusinessApp
         {
             //Console.Write(" - ");
             decimal i = 0;
-            while (!decimal.TryParse(Console.ReadLine(), out i) || i == null)
+            while (!decimal.TryParse(Console.ReadLine(), out i))
             {
                 ClearLine();
                 Console.Write("This is not valid input. Please try again: ");

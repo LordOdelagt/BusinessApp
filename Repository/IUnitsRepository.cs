@@ -15,6 +15,7 @@ namespace Repository
         Units GetUnitsByName(string? name);
         Units CreateUnits(string? name);
         List<Units> GetUnits();
-        Units GetFromString(string line);
+        Units GetFromCsv(string line);
+        void Delete(int id);
     }
 }

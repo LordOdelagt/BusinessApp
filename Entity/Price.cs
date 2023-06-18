@@ -14,8 +14,11 @@ namespace Entity
         public decimal PriceTotal { get; set; }
         public string ToString()
         {
-            return PriceId.ToString() + Delimiter + PriceGoodsId.ToString()
-                + Delimiter + PriceUnitsId.ToString() + Delimiter + PriceTotal.ToString();
+            return 
+                PriceId.ToString()      + Delimiter + 
+                PriceGoodsId.ToString() + Delimiter + 
+                PriceUnitsId.ToString() + Delimiter + 
+                PriceTotal.ToString();
         }
     }
 }

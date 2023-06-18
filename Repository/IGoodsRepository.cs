@@ -15,6 +15,6 @@ namespace Repository
         Goods GetGoodsByName(string? name);
         Goods CreateGoods(string name);
         List<Goods> GetGoods();
-        Goods GetFromString(string line);
+        Goods GetFromCsv(string line);
     }
 }

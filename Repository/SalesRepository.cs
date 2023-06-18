@@ -39,7 +39,7 @@ namespace Repository
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    Sales sales = GetFromString(line);
+                    Sales sales = GetFromCsv(line);
                     if (sales.SalesId == id)
                     {
                         return sales;
@@ -50,13 +50,13 @@ namespace Repository
         }
         //Временное решение?
         //Будет дополняться по мере добавления новых Entity
-        public Sales CreateSales(Goods goods, Units units, Price price, int quantity)
+        public Sales CreateSales(Goods Goods, Units units, Price price, int quantity)
         {
             //Потенциально надо как-то упростить 
             var sales = new Sales
             {
                 SalesId = CheckSalesID(),
-                SalesGoodsId = goods.Id,
+                SalesGoodsId = Goods.Id,
                 SalesUnitsId = units.Id,
                 SalesQuantity = quantity,
                 SalesPrice = price.PriceTotal * quantity
@@ -65,7 +65,7 @@ namespace Repository
             {
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
                 {
-                    writer.Write($"\n{sales.ToString()}");
+                    writer.Write($"\n{sales}");
                 }
                 Counter++;
             }
@@ -85,7 +85,7 @@ namespace Repository
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    Sales sales = GetFromString(line);
+                    Sales sales = GetFromCsv(line);
                     list.Add(sales);//Нужно ли тут добавить перепроверку на null?
                 }
             }
@@ -93,7 +93,7 @@ namespace Repository
         }
 
 
-        public Sales GetFromString(string line)
+        public Sales GetFromCsv(string line)
         {
             if (line != null)
             {

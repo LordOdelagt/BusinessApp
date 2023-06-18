@@ -14,7 +14,7 @@ namespace Entity
         public int SalesUnitsId { get; set; }
         public int SalesQuantity { get; set; }
         public decimal SalesPrice { get; set; }
-        public string ToString()
+        public override string ToString()
         {
             return SalesId + Delimiter + SalesGoodsId
                 + Delimiter + SalesUnitsId + Delimiter + SalesQuantity

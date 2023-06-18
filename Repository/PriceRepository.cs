@@ -22,12 +22,12 @@ namespace Repository
             this.warningnMessage = warningMessage;
         }
 
-        public Price CreatePrice(Goods goods, Units units, decimal total)
+        public Price CreatePrice(Goods Goods, Units units, decimal total)
         {
             var price = new Price
             {
                 PriceId = CheckPriceId(),
-                PriceGoodsId = goods.Id,
+                PriceGoodsId = Goods.Id,
                 PriceUnitsId = units.Id,
                 PriceTotal = total
             };
@@ -70,7 +70,7 @@ namespace Repository
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    Price price = GetFromString(line);
+                    Price price = GetFromCsv(line);
                     list.Add(price);//Нужно ли тут добавить перепроверку на null?
                 }
             }
@@ -84,7 +84,7 @@ namespace Repository
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    Price price = GetFromString(line);
+                    Price price = GetFromCsv(line);
                     if (price.PriceId == id)
                     {
                         return price;
@@ -94,15 +94,16 @@ namespace Repository
             return null;
         }
 
-        public Price SearchPriceByMatch(Goods goods, Units units)
+        public Price SearchPriceByMatch(Goods Goods, Units units)
         {
+            //TODO: принимать не объекты, а Int
             using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
             {
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    Price price = GetFromString(line);
-                    if (price.PriceGoodsId == goods.Id && price.PriceUnitsId == units.Id)
+                    Price price = GetFromCsv(line);
+                    if (price.PriceGoodsId == Goods.Id && price.PriceUnitsId == units.Id)
                     {
                         return price;
                     }
@@ -111,7 +112,7 @@ namespace Repository
             return null;
         }
 
-        public Price GetFromString(string line)
+        public Price GetFromCsv(string line)
         {
             if (line != null)
             {

@@ -24,12 +24,12 @@ namespace Repository
         //Запись нового элемента
         public Goods CreateGoods(string name)
         {
-            var goods = new Goods { Id = CheckGoodsID(), Name = name };
+            var Goods = new Goods { Id = CheckGoodsID(), Name = name };
             try
             {
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
                 {
-                    writer.Write($"\n{goods.ToString()}");
+                    writer.Write($"\n{Goods.ToString()}");
                 }
                 Counter++;
             }
@@ -38,7 +38,7 @@ namespace Repository
                 warningnMessage.Log("An error occurred while creating the CSV file: " + e.Message);
                 throw new IOException();
             }
-            return goods;
+            return Goods;
         }
         //Получение количества строк. ID будущего элемента = Counter. 
         private int CheckGoodsID()
@@ -59,16 +59,15 @@ namespace Repository
         //Возвращает объект Goods по введенному id
         public Goods SearchGoodsByID(int id)
         {
-
             using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
             {
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    Goods goods = GetFromString(line);//теперь работает через getfromString
-                    if (goods.Id == id)
+                    Goods Goods = GetFromCsv(line);//теперь работает через getfromCsv
+                    if (Goods.Id == id)
                     {
-                        return goods; //Было через return new Goods. Исправлено 
+                        return Goods; //Было через return new Goods. Исправлено 
                     }
                 }
             }
@@ -82,11 +81,11 @@ namespace Repository
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    Goods goods = GetFromString(line);
-                    string goodsName = goods.Name;
-                    if (goodsName.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                    Goods Goods = GetFromCsv(line);
+                    string GoodsName = Goods.Name;
+                    if (GoodsName.Equals(name, StringComparison.InvariantCultureIgnoreCase))
                     {
-                        return goods;
+                        return Goods;
                     }
                 }
             }
@@ -101,14 +100,13 @@ namespace Repository
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    Goods goods = GetFromString(line);
-                    list.Add(goods);
+                    Goods Goods = GetFromCsv(line);
+                    list.Add(Goods);
                 }
             }
             return list;
         }
-        //Поменял название с GetFromCsv на GetFromString
-        public Goods GetFromString(string line)
+        public Goods GetFromCsv(string line)
         {
             if (line != null)
             {
