@@ -50,13 +50,14 @@ namespace Repository
         }
         //Временное решение?
         //Будет дополняться по мере добавления новых Entity
-        public Sales CreateSales(Goods Goods, Units units, Price price, int quantity)
+        public Sales CreateSales(Category Category, Units units, Price price, int quantity)
         {
+            var saleId = GetSales().Max(s => s.SalesId) + 1;
             //Потенциально надо как-то упростить 
             var sales = new Sales
             {
-                SalesId = CheckSalesID(),
-                SalesGoodsId = Goods.Id,
+                SalesId = saleId,
+                SalesCategoryId = Category.Id,
                 SalesUnitsId = units.Id,
                 SalesQuantity = quantity,
                 SalesPrice = price.PriceTotal * quantity
@@ -92,7 +93,20 @@ namespace Repository
             return list;
         }
 
-
+        public void Delete(int id)
+        {
+            var list = GetSales();
+            var sale = list.SingleOrDefault(sale => sale.SalesId == id);
+            var sale1 = list.Remove(sale);
+            File.Delete(FilePath);
+            foreach (var item in list)
+            {
+                using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
+                {
+                    writer.WriteLine($"{item}");
+                }
+            }
+        }
         public Sales GetFromCsv(string line)
         {
             if (line != null)
@@ -101,7 +115,7 @@ namespace Repository
                 return new Sales
                 {
                     SalesId = Convert.ToInt32(values[(int)SalesEnum.Id]),
-                    SalesGoodsId = Convert.ToInt32(values[(int)SalesEnum.GoodsId]),
+                    SalesCategoryId = Convert.ToInt32(values[(int)SalesEnum.CategoryId]),
                     SalesUnitsId = Convert.ToInt32(values[(int)SalesEnum.UnitsId]),
                     SalesQuantity = Convert.ToInt32(values[(int)SalesEnum.Quantity]),
                     SalesPrice = Convert.ToDecimal(values[(int)SalesEnum.Price])

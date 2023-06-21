@@ -10,10 +10,10 @@ namespace Repository
     public interface IPriceRepository
     {
         string FilePath { get; }
-        Price CreatePrice(Goods Goods, Units units, decimal total);
+        Price CreatePrice(Category Category, Units units, decimal total);
         Price SearchPriceById(int id);
-        Price SearchPriceByMatch(Goods Goods, Units units);
+        Price SearchPriceByMatch(int CategoryId, int unitsId);
         List<Price> GetPrices();
-        Price GetFromCsv(string line);
+        void Delete(int id);
     }
 }

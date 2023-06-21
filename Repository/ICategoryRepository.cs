@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 
 namespace Repository
 {
-    public interface IUnitsRepository
+    public interface ICategoryRepository
     {
         string FilePath { get; }
 
-        Units SearchUnitsByID(int id);
-        Units GetUnitsByName(string? name);
-        Units CreateUnits(string? name);
-        List<Units> GetUnits();
+        Category SearchCategoryByID(int id);
+        Category GetCategoryByName(string? name);
+        Category CreateCategory(string name);
+        List<Category> GetCategory();
         void Delete(int id);
     }
 }

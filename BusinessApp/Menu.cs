@@ -11,7 +11,8 @@ namespace BusinessApp
 {
     public class Menu
     {
-        IGoodsRepository GoodsRepository = new GoodsRepository(new ExceptionLogToConsole());
+        ICategoryRepository categoryRepository = new CategoryRepository(new ExceptionLogToConsole());
+        IGoodsRepository goodsRepository = new GoodsRepository(new ExceptionLogToConsole());
         IUnitsRepository unitsRepository = new UnitsRepository(new ExceptionLogToConsole());
         ISalesRepository salesRepository = new SalesRepository(new ExceptionLogToConsole());
         IPriceRepository priceRepository = new PriceRepository(new ExceptionLogToConsole());
@@ -20,7 +21,7 @@ namespace BusinessApp
             Console.Clear();
             Console.WriteLine("Welcome! This is Business App.\n");
             Console.WriteLine("Please, choose the option:");
-            Console.WriteLine("\n1. Create new Goods\n2. Check Goods\n3. Create new Units\n4. Check Units\n5. Create new Sales\n6. Check sales\n0. Exit");
+            Console.WriteLine("\n1. Create new Category\n2. Check Category\n3. Create new Units\n4. Check Units\n5. Create new Sales\n6. Check sales\n0. Exit");
             Navigation();
         }
         private void Navigation()
@@ -29,13 +30,13 @@ namespace BusinessApp
             string? input = Console.ReadLine();
             switch (input)
             {
-                case "1"://Создать новый Goods
-                    StartGoodsExecution();
+                case "1"://Создать новый Category
+                    StartCategoryExecution();
                     StartMenu();
                     break;
-                case "2"://Считать Goods
+                case "2"://Считать Category
                     Console.Clear();
-                    ReadGoodsFile();
+                    ReadCategoryFile();
                     Console.WriteLine("Press Enter to return...");
                     Console.ReadLine();
                     Console.Clear();
@@ -82,50 +83,50 @@ namespace BusinessApp
                     break;
             }
         }
-        //Запуск работы c Goods
-        private void StartGoodsExecution()
+        //Запуск работы c Category
+        private void StartCategoryExecution()
         {
             bool exist = true;
-            Console.WriteLine("Enter the name of Goods: ");
+            Console.WriteLine("Enter the name of Category: ");
             string? name = EnterName();
-            var Goods = GoodsRepository.GetGoodsByName(name);
-            if (Goods == null)
+            var Category = categoryRepository.GetCategoryByName(name);
+            if (Category == null)
             {
-                GoodsRepository.CreateGoods(name);
-                exist = false;
+                categoryRepository.CreateCategory(name);
+                exist = true;
             }
             if (exist)
             {
-                GoodsMatchCheckTrue(name);
-            }
-            else
-            {
-                Console.WriteLine($"Position created successfully as id {Goods.Id}!\n Press Enter to continue...");
+                Console.WriteLine($"Position created successfully as id {Category.Id}!\n Press Enter to continue...");
                 Console.ReadLine();
                 Console.Clear();
             }
+            else
+            {
+                CategoryMatchCheckTrue(name);
+            }
         }
-        private void GoodsMatchCheckTrue(string name)
+        private void CategoryMatchCheckTrue(string name)
         {
             Console.WriteLine($"{name} already exists. Do you want to try again? y/n");
             string input = Console.ReadLine();
             switch (input)
             {
                 case "y":
-                    StartGoodsExecution();
+                    StartCategoryExecution();
                     break;
                 case "n":
                     Console.Clear();
                     return;
             }
         }
-        //Читает информацию с файла Goods.
-        private void ReadGoodsFile()
+        //Читает информацию с файла Category.
+        private void ReadCategoryFile()
         {
             Console.WriteLine("The existing positions are: \n");
             try
             {
-                foreach (var item in GoodsRepository.GetGoods())
+                foreach (var item in categoryRepository.GetCategory())
                 {
                     Console.WriteLine($"{item} \t");
                 }
@@ -194,18 +195,18 @@ namespace BusinessApp
         }
         private void StartSalesExecution()
         {
-            var Goods = PickGoodsById();
+            var Category = PickCategoryById();
             var units = PickUnitsById();
 
 
-            var price = priceRepository.SearchPriceByMatch(Goods, units);
+            var price = priceRepository.SearchPriceByMatch(Category.Id, units.Id);
             if (price == null)
             {
                 Console.Clear();
-                Console.WriteLine($"There's no price set for {units.Name} {Goods.Name}.");
+                Console.WriteLine($"There's no price set for {units.Name} {Category.Name}.");
                 Console.Write("Please, enter the price: ");
                 decimal total = EnterDecimal();
-                price = priceRepository.CreatePrice(Goods, units, total);
+                price = priceRepository.CreatePrice(Category, units, total);
             }
 
 
@@ -213,7 +214,7 @@ namespace BusinessApp
             int quantity = EnterInt();//Done: Сделать функцию на проверку на буквы, null etc.
 
 
-            var sales = salesRepository.CreateSales(Goods, units, price, quantity);
+            var sales = salesRepository.CreateSales(Category, units, price, quantity);
             if (sales != null)
             {
                 Console.WriteLine($"\nSale created successfully as id: {sales.SalesId}!\n Press Enter to continue...");
@@ -230,7 +231,7 @@ namespace BusinessApp
             {
                 foreach (var item in salesRepository.GetSales())
                 {
-                    var Goods = GoodsRepository.SearchGoodsByID(item.SalesGoodsId);
+                    var Category = categoryRepository.SearchCategoryByID(item.SalesCategoryId);
                     var units = unitsRepository.SearchUnitsByID(item.SalesUnitsId);
 
                     //Проверка чтения
@@ -238,10 +239,10 @@ namespace BusinessApp
                     Console.Write($"   ");
                     if (item.SalesQuantity > 1)
                     {
-                        Console.Write($"{item.SalesQuantity} {units.Name} {Goods.Name}s for {item.SalesPrice}$");
+                        Console.Write($"{item.SalesQuantity} {units.Name} {Category.Name}s for {item.SalesPrice}$");
                     }
                     else
-                        Console.Write($"{item.SalesQuantity} {units.Name} {Goods.Name} for {item.SalesPrice}$");
+                        Console.Write($"{item.SalesQuantity} {units.Name} {Category.Name} for {item.SalesPrice}$");
                     Console.WriteLine();
                 }
             }
@@ -255,12 +256,12 @@ namespace BusinessApp
         }
         private void StartPriceExecution()
         {
-            var Goods = PickGoodsById();
+            var Category = PickCategoryById();
             var units = PickUnitsById();
 
-            Console.Write($"The total price of {units.Name} {Goods.Name}: ");
+            Console.Write($"The total price of {units.Name} {Category.Name}: ");
             decimal total = EnterDecimal();
-            var price = priceRepository.CreatePrice(Goods, units, total);
+            var price = priceRepository.CreatePrice(Category, units, total);
             if (price != null)
             {
                 Console.WriteLine("\nPrice set successfully!\n Press Enter to continue...");
@@ -277,14 +278,14 @@ namespace BusinessApp
             {
                 foreach (var item in priceRepository.GetPrices())
                 {
-                    int id = item.PriceGoodsId;
-                    var Goods = GoodsRepository.SearchGoodsByID(id);
+                    int id = item.PriceCategoryId;
+                    var Category = categoryRepository.SearchCategoryByID(id);
                     id = item.PriceUnitsId;
                     var units = unitsRepository.SearchUnitsByID(id);
                     //Проверка чтения
                     Console.Write($"{item.PriceId}.");
                     Console.Write($"   ");
-                    Console.Write($"{units.Name} {Goods.Name} is {item.PriceTotal}$");
+                    Console.Write($"{units.Name} {Category.Name} is {item.PriceTotal}$");
                     Console.WriteLine();
                 }
                 Console.WriteLine();
@@ -309,23 +310,23 @@ namespace BusinessApp
             return name;
         }
 
-        private Goods PickGoodsById()
+        private Category PickCategoryById()
         {
             Console.Clear();
             Console.WriteLine("Pick the product from database.\n");
-            ReadGoodsFile();
+            ReadCategoryFile();
             Console.Write("Enter the id: ");
             int id = EnterInt();
-            Goods Goods = GoodsRepository.SearchGoodsByID(id);
-            while (Goods == null)
+            Category Category = categoryRepository.SearchCategoryByID(id);
+            while (Category == null)
             {
                 ClearLine();
                 Console.WriteLine($"The product with id {id} doesn't exist in the database. Try again.\n");
                 Console.Write("Enter the id: ");
                 id = EnterInt();
-                Goods = GoodsRepository.SearchGoodsByID(id);
+                Category = categoryRepository.SearchCategoryByID(id);
             }
-            return Goods;
+            return Category;
         }
 
         private Units PickUnitsById()

@@ -9,7 +9,7 @@ namespace Entity
     public enum PriceEnum
     {
         PriceId,
-        GoodsId,
+        CategoryId,
         UnitsId,
         PriceTotal
     }

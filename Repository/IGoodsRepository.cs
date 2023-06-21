@@ -13,8 +13,8 @@ namespace Repository
 
         Goods SearchGoodsByID(int id);
         Goods GetGoodsByName(string? name);
-        Goods CreateGoods(string name);
+        Goods CreateGoods(string name, int categoryId, int unitsId, int quantity);
         List<Goods> GetGoods();
-        Goods GetFromCsv(string line);
+        void Delete(int id);
     }
 }

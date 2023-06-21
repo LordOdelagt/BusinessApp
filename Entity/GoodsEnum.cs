@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Entity
 {
-    public enum SalesEnum
+    public enum GoodsEnum
     {
         Id,
+        Name,
         CategoryId,
         UnitsId,
-        Quantity,
-        Price
+        Quantity
     }
 }

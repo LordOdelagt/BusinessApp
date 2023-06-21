@@ -1,53 +1,47 @@
 ﻿using Entity;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Repository
 {
-    public class PriceRepository : Common, IPriceRepository
+    public class CategoryRepository : Common, ICategoryRepository
     {
         private static int Counter = 0;
 
         readonly IExceptionLog warningnMessage;
 
-        public string FilePath => "Data/PriceData.csv";
+        public string FilePath => "Data/CategoryData.csv";
 
         //Конструкция для сообщения об ошибке
-        public PriceRepository(IExceptionLog warningMessage)
+        public CategoryRepository(IExceptionLog warningMessage)
         {
             this.warningnMessage = warningMessage;
         }
-
-        public Price CreatePrice(Category Category, Units units, decimal total)
+        //Запись нового элемента
+        public Category CreateCategory(string name)
         {
-            var priceId = GetPrices().Max(p => p.PriceId) + 1;
-            var price = new Price
-            {
-                PriceId = priceId,
-                PriceCategoryId = Category.Id,
-                PriceUnitsId = units.Id,
-                PriceTotal = total
-            };
+            var CategoryId = GetCategory().Max(g => g.Id) + 1;
+            var Category = new Category { Id = CategoryId, Name = name };
             try
             {
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
                 {
-                    writer.Write($"\n{price}");
+                    writer.Write($"\n{Category}");
                 }
-                Counter++;
             }
             catch (IOException e)
             {
                 warningnMessage.Log("An error occurred while creating the CSV file: " + e.Message);
-                return null;
+                throw new IOException();
             }
-            return price;
+            return Category;
         }
-        public int CheckPriceId()
+        //Получение количества строк. ID будущего элемента = Counter. 
+        private int CheckCategoryID()
         {
             if (Counter == 0)
             {
@@ -62,62 +56,62 @@ namespace Repository
             }
             return Counter;
         }
-
-        public List<Price> GetPrices()
+        //Возвращает объект Category по введенному id
+        public Category SearchCategoryByID(int id)
         {
-            List<Price> list = new List<Price>();
             using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
             {
                 while (!reader.EndOfStream)
                 {
                     string line = reader.ReadLine();
-                    Price price = GetFromCsv(line);
-                    list.Add(price);//Нужно ли тут добавить перепроверку на null?
+                    Category Category = GetFromCsv(line);//теперь работает через getfromCsv
+                    if (Category.Id == id)
+                    {
+                        return Category; //Было через return new Category. Исправлено 
+                    }
+                }
+            }
+            return null;
+        }
+        //Возравщение обьекта Category по имени 
+        public Category GetCategoryByName(string? name)
+        {
+            using (StreamReader reader = new StreamReader(FilePath))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    Category Category = GetFromCsv(line);
+                    string CategoryName = Category.Name;
+                    if (CategoryName.Equals(name, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        return Category;
+                    }
+                }
+            }
+            return null;
+        }
+
+        public List<Category> GetCategory()
+        {
+            List<Category> list = new List<Category>();
+            using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string line = reader.ReadLine();
+                    Category Category = GetFromCsv(line);
+                    list.Add(Category);
                 }
             }
             return list;
         }
 
-        public Price SearchPriceById(int id)
-        {
-            using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
-            {
-                while (!reader.EndOfStream)
-                {
-                    string line = reader.ReadLine();
-                    Price price = GetFromCsv(line);
-                    if (price.PriceId == id)
-                    {
-                        return price;
-                    }
-                }
-            }
-            return null;
-        }
-
-        public Price SearchPriceByMatch(int CategoryId, int unitsId)
-        {
-            //TODO: принимать не объекты, а Int
-            using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
-            {
-                while (!reader.EndOfStream)
-                {
-                    string line = reader.ReadLine();
-                    Price price = GetFromCsv(line);
-                    if (price.PriceCategoryId == CategoryId && price.PriceUnitsId == unitsId)
-                    {
-                        return price;
-                    }
-                }
-            }
-            return null;
-        }
-
         public void Delete(int id)
         {
-            var list = GetPrices();
-            var price = list.SingleOrDefault(price => price.PriceId == id);
-            var price1 = list.Remove(price);
+            var list = GetCategory();
+            var Category = list.SingleOrDefault(Category => Category.Id == id);
+            var Category1 = list.Remove(Category);
             File.Delete(FilePath);
             foreach (var item in list)
             {
@@ -127,17 +121,15 @@ namespace Repository
                 }
             }
         }
-        public Price GetFromCsv(string line)
+        public Category GetFromCsv(string line)
         {
             if (line != null)
             {
                 string[] values = line.Split(Delimiter);
-                return new Price
+                return new Category 
                 {
-                    PriceId = Convert.ToInt32(values[(int)PriceEnum.PriceId]),
-                    PriceCategoryId = Convert.ToInt32(values[(int)PriceEnum.CategoryId]),
-                    PriceUnitsId = Convert.ToInt32(values[(int)PriceEnum.UnitsId]),
-                    PriceTotal = Convert.ToDecimal(values[(int)PriceEnum.PriceTotal])
+                    Id = Convert.ToInt32(values[(int)ProductEnum.Id]),
+                    Name = Convert.ToString(values[(int)ProductEnum.Name])
                 };
             }
             return null;

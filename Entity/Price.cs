@@ -9,14 +9,14 @@ namespace Entity
     public class Price : Common
     {
         public int PriceId { get; set; }
-        public int PriceGoodsId { get; set; }
+        public int PriceCategoryId { get; set; }
         public int PriceUnitsId { get; set; }
         public decimal PriceTotal { get; set; }
-        public string ToString()
+        public override string ToString()
         {
             return 
                 PriceId.ToString()      + Delimiter + 
-                PriceGoodsId.ToString() + Delimiter + 
+                PriceCategoryId.ToString() + Delimiter + 
                 PriceUnitsId.ToString() + Delimiter + 
                 PriceTotal.ToString();
         }
