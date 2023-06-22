@@ -26,15 +26,32 @@ namespace BusinessApp
         }
         private void Navigation()
         {
-            Console.Write(" - ");
-            string? input = Console.ReadLine();
+            //Console.Write("- ");
+            string? input = Convert.ToString(Console.ReadLine());
             switch (input)
             {
-                case "1"://Создать новый Category
+                //Работа с Goods
+                case "1":
+                    StartGoodsExecution();
+                    StartMenu();
+                    break;
+                case "2":
+                    Console.Clear();
+                    ReadGoodsFile();
+                    Console.WriteLine("Press Enter to return...");
+                    Console.ReadLine();
+                    Console.Clear();
+                    StartMenu();
+                    break;
+                case "g":
+                    goto case "1";
+
+                //Работа с Category
+                case "3":
                     StartCategoryExecution();
                     StartMenu();
                     break;
-                case "2"://Считать Category
+                case "4":
                     Console.Clear();
                     ReadCategoryFile();
                     Console.WriteLine("Press Enter to return...");
@@ -42,11 +59,15 @@ namespace BusinessApp
                     Console.Clear();
                     StartMenu();
                     break;
-                case "3":
+                case "c":
+                    goto case "3";
+
+                //Работа с Units
+                case "5":
                     StartUnitsExecution();
                     StartMenu();
                     break;
-                case "4":
+                case "6":
                     Console.Clear();
                     ReadUnitsFile();
                     Console.WriteLine("Press Enter to return...");
@@ -54,15 +75,10 @@ namespace BusinessApp
                     Console.Clear();
                     StartMenu();
                     break;
-                case "5":
-                    StartSalesExecution();
-                    StartMenu();
-                    break;
-                case "6":
-                    Console.Clear();
-                    ReadSalesFile();
-                    StartMenu();
-                    break;
+                case "u":
+                    goto case "5";
+
+                //Работа с Price
                 case "7":
                     StartPriceExecution();
                     StartMenu();
@@ -75,12 +91,94 @@ namespace BusinessApp
                     Console.Clear();
                     StartMenu();
                     break;
+                case "p":
+                    goto case "7";
+
+                //Работа с Sales
+                case "9":
+                    StartSalesExecution();
+                    StartMenu();
+                    break;
+                case "10":
+                    Console.Clear();
+                    ReadSalesFile();
+                    Console.WriteLine("Press Enter to return...");
+                    Console.ReadLine();
+                    Console.Clear();
+                    StartMenu();
+                    break;
+                case "s":
+                    goto case "9";
+
+
                 default:
                     Console.WriteLine("There's no such option! Please try again. Press Enter to continue...");
                     Console.ReadLine();
                     Console.Clear();
                     StartMenu();
                     break;
+            }
+        }
+
+        private void StartGoodsExecution()
+        {
+            Console.WriteLine("Enter the name of new product: ");
+            string? name = EnterName();
+            var goods = goodsRepository.GetGoodsByName(name);
+            if (goods != null)
+            {
+                GoodsMatchCheckTrue(name);
+            }
+
+            var category = PickCategoryById();
+
+            var units = PickUnitsById();
+
+            Console.WriteLine($"Enter the quantity of {units.Name} {goods.Name} to add in database: ");
+            goods.GoodsQuantity = EnterInt();
+
+            goodsRepository.CreateGoods(goods.Name, goods.CategoryId, goods.UnitsId, goods.GoodsQuantity);
+
+            Console.WriteLine($"Position created successfully as id {goods.Id}!\n Press Enter to continue...");
+            Console.ReadLine();
+            Console.Clear();
+        }
+        private void GoodsMatchCheckTrue(string name)
+        {
+            Console.WriteLine($"{name} already exists. Do you want to try again? y/n");
+            string input = Console.ReadLine();
+            switch (input)
+            {
+                case "y":
+                    StartGoodsExecution();
+                    break;
+                case "n":
+                    Console.Clear();
+                    return;
+            }
+        }
+        //Читает информацию с файла Goods.
+        private void ReadGoodsFile()
+        {
+            Console.WriteLine("The existing positions are: \n");
+            try
+            {
+                foreach (var item in goodsRepository.GetGoods())
+                {
+                    var category = categoryRepository.SearchCategoryByID(item.CategoryId);
+                    var units = unitsRepository.SearchUnitsByID(item.UnitsId);
+
+                    //Проверка чтения
+                    Console.Write($"{item.Id}.");
+                    Console.Write($"   ");
+                    Console.Write($"{item.GoodsQuantity} {units.Name} {item.Name}");
+                    Console.WriteLine();
+                }
+                Console.WriteLine();
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine("An error occurred while reading the CSV file: " + e.Message);
             }
         }
         //Запуск работы c Category
@@ -195,26 +293,37 @@ namespace BusinessApp
         }
         private void StartSalesExecution()
         {
-            var Category = PickCategoryById();
-            var units = PickUnitsById();
+            var goods = PickGoodsById();
+            //var Category = PickCategoryById();
+            //var units = PickUnitsById();
 
-
-            var price = priceRepository.SearchPriceByMatch(Category.Id, units.Id);
+            var price = priceRepository.SearchPriceByMatch(goods.CategoryId, goods.UnitsId);
             if (price == null)
             {
                 Console.Clear();
-                Console.WriteLine($"There's no price set for {units.Name} {Category.Name}.");
-                Console.Write("Please, enter the price: ");
+                Console.WriteLine($"There's no price set!");
+                Console.Write("Please, set the new price: ");
                 decimal total = EnterDecimal();
-                price = priceRepository.CreatePrice(Category, units, total);
+                price = priceRepository.CreatePrice(goods.CategoryId, goods.UnitsId, total);
             }
 
-
             Console.WriteLine("Enter quantity:");
-            int quantity = EnterInt();//Done: Сделать функцию на проверку на буквы, null etc.
+            int quantity = EnterInt();
 
+            //TODO: тут должна быть проверка quantity из goods
+            while (quantity>goods.GoodsQuantity)
+            {
+                ClearLine();
+                Console.WriteLine("There's not enough products for sale! Please try again!");
+                Console.WriteLine("Enter quantity:");
+                quantity = EnterInt();
+            }
 
-            var sales = salesRepository.CreateSales(Category, units, price, quantity);
+            //Обновляет количество товара на складе
+            goodsRepository.Delete(goods.Id);
+            goodsRepository.CreateGoods(goods.Name, goods.CategoryId, goods.UnitsId, goods.GoodsQuantity-quantity);
+
+            var sales = salesRepository.CreateSales(goods.Id, goods.CategoryId, goods.UnitsId, price.PriceTotal, quantity);
             if (sales != null)
             {
                 Console.WriteLine($"\nSale created successfully as id: {sales.SalesId}!\n Press Enter to continue...");
@@ -233,16 +342,16 @@ namespace BusinessApp
                 {
                     var Category = categoryRepository.SearchCategoryByID(item.SalesCategoryId);
                     var units = unitsRepository.SearchUnitsByID(item.SalesUnitsId);
-
+                    var goods = goodsRepository.SearchGoodsByID(item.SalesGoodsId);
                     //Проверка чтения
                     Console.Write($"{item.SalesId}.");
                     Console.Write($"   ");
                     if (item.SalesQuantity > 1)
                     {
-                        Console.Write($"{item.SalesQuantity} {units.Name} {Category.Name}s for {item.SalesPrice}$");
+                        Console.Write($"{item.SalesQuantity} {units.Name} {goods.Name} {Category.Name}s for {item.SalesPrice}$");
                     }
                     else
-                        Console.Write($"{item.SalesQuantity} {units.Name} {Category.Name} for {item.SalesPrice}$");
+                        Console.Write($"{item.SalesQuantity} {units.Name} {goods.Name} {Category.Name} for {item.SalesPrice}$");
                     Console.WriteLine();
                 }
             }
@@ -261,7 +370,7 @@ namespace BusinessApp
 
             Console.Write($"The total price of {units.Name} {Category.Name}: ");
             decimal total = EnterDecimal();
-            var price = priceRepository.CreatePrice(Category, units, total);
+            var price = priceRepository.CreatePrice(Category.Id, units.Id, total);
             if (price != null)
             {
                 Console.WriteLine("\nPrice set successfully!\n Press Enter to continue...");
@@ -309,11 +418,29 @@ namespace BusinessApp
             }
             return name;
         }
+        private Goods PickGoodsById()
+        {
+            Console.Clear();
+            Console.WriteLine("Pick the product from database.\n");
+            ReadGoodsFile();
+            Console.Write("Enter the id: ");
+            int id = EnterInt();
+            Goods goods = goodsRepository.SearchGoodsByID(id);
+            while (goods == null)
+            {
+                ClearLine();
+                Console.WriteLine($"The product with id {id} doesn't exist in the database. Try again.\n");
+                Console.Write("Enter the id: ");
+                id = EnterInt();
+                goods = goodsRepository.SearchGoodsByID(id);
+            }
+            return goods;
+        }
 
         private Category PickCategoryById()
         {
             Console.Clear();
-            Console.WriteLine("Pick the product from database.\n");
+            Console.WriteLine("Pick the Category from database.\n");
             ReadCategoryFile();
             Console.Write("Enter the id: ");
             int id = EnterInt();

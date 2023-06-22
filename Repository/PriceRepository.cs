@@ -22,14 +22,14 @@ namespace Repository
             this.warningnMessage = warningMessage;
         }
 
-        public Price CreatePrice(Category Category, Units units, decimal total)
+        public Price CreatePrice(int categoryId, int unitsId, decimal total)
         {
             var priceId = GetPrices().Max(p => p.PriceId) + 1;
             var price = new Price
             {
                 PriceId = priceId,
-                PriceCategoryId = Category.Id,
-                PriceUnitsId = units.Id,
+                PriceCategoryId = categoryId,
+                PriceUnitsId = unitsId,
                 PriceTotal = total
             };
             try

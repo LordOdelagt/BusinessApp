@@ -16,22 +16,7 @@ namespace Repository
         readonly IExceptionLog warningnMessage;
         //Конструкция для сообщения об ошибке
         public SalesRepository(IExceptionLog warningMessage) => this.warningnMessage = warningMessage;
-        //Получаем ID будущей покупки
-        public int CheckSalesID()
-        {
-            if (Counter == 0)
-            {
-                using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
-                {
-                    while (reader.ReadLine() != null)
-                    {
-                        Counter++;
-                    }
-                    Counter++;
-                }
-            }
-            return Counter;
-        }
+        
         public Sales SearchSalesByID(int id)
         {
             using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
@@ -48,19 +33,18 @@ namespace Repository
             }
             return null;
         }
-        //Временное решение?
         //Будет дополняться по мере добавления новых Entity
-        public Sales CreateSales(Category Category, Units units, Price price, int quantity)
+        public Sales CreateSales(int goodsId, int categoryId, int unitsId, decimal price, int quantity)
         {
-            var saleId = GetSales().Max(s => s.SalesId) + 1;
-            //Потенциально надо как-то упростить 
+            int saleId = GetSales().Max(s => s.SalesId) + 1;
             var sales = new Sales
             {
                 SalesId = saleId,
-                SalesCategoryId = Category.Id,
-                SalesUnitsId = units.Id,
+                SalesGoodsId = goodsId,
+                SalesCategoryId = categoryId,
+                SalesUnitsId = unitsId,
                 SalesQuantity = quantity,
-                SalesPrice = price.PriceTotal * quantity
+                SalesPrice = price * quantity
             };
             try
             {
@@ -68,7 +52,6 @@ namespace Repository
                 {
                     writer.Write($"\n{sales}");
                 }
-                Counter++;
             }
             catch (IOException e)
             {

@@ -1,6 +1,7 @@
 ﻿using Entity;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,8 +24,24 @@ namespace Repository
         //Запись нового элемента
         public Goods CreateGoods(string name, int categoryId, int unitsId, int quantity)
         {
-            var goodsId = GetGoods().Max(g => g.Id) + 1;
-            var goods = new Goods 
+            var list = GetGoods();
+            Goods goods = new Goods();
+
+            //if (list.Count == 0)
+            //{
+            //    List<Goods> list2 = new List<Goods>();
+            //    //var goodsId = list2.Max(g => g.Id);
+            //    goods = new Goods
+            //    {
+            //        Id = 1,
+            //        Name = name,
+            //        CategoryId = categoryId,
+            //        UnitsId = unitsId,
+            //        GoodsQuantity = quantity
+            //    };
+            //}
+            var goodsId = list.Count == 0 ? 1 : list.Max(g => g.Id) + 1;
+            goods = new Goods
             {
                 Id = goodsId,
                 Name = name,
@@ -32,11 +49,15 @@ namespace Repository
                 UnitsId = unitsId,
                 GoodsQuantity = quantity
             };
+
             try
             {
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
                 {
-                    writer.Write($"\n{goods}");
+                    if(goodsId == 1) 
+                    writer.Write($"{goods.ToString()}");
+                    else
+                    writer.Write($"\n{goods.ToString()}");
                 }
             }
             catch (IOException e)
@@ -45,6 +66,8 @@ namespace Repository
                 throw new IOException();
             }
             return goods;
+
+
         }
         
         //Возвращает объект Goods по введенному id
@@ -97,24 +120,25 @@ namespace Repository
             }
             return list;
         }
-
         public void Delete(int id)
         {
             var list = GetGoods();
             var goods = list.SingleOrDefault(goods => goods.Id == id);
             var goods11 = list.Remove(goods);
             File.Delete(FilePath);
+            var myFile = File.Create(FilePath);
+            myFile.Close();
             foreach (var item in list)
             {
-                using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
+                using (StreamWriter writer = new StreamWriter(FilePath))
                 {
-                    writer.WriteLine($"{item}");
+                    writer.WriteLine($"{item.ToString()}");
                 }
             }
         }
         public Goods GetFromCsv(string line)
         {
-            if (line != null)
+            if (!string.IsNullOrEmpty(line))
             {
                 string[] values = line.Split(Delimiter);
                 return new Goods

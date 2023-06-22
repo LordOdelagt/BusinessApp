@@ -10,7 +10,7 @@ namespace Repository
     public interface IPriceRepository
     {
         string FilePath { get; }
-        Price CreatePrice(Category Category, Units units, decimal total);
+        Price CreatePrice(int categoryId, int unitsId, decimal total);
         Price SearchPriceById(int id);
         Price SearchPriceByMatch(int CategoryId, int unitsId);
         List<Price> GetPrices();

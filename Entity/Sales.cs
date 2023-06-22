@@ -10,14 +10,15 @@ namespace Entity
     public class Sales : Common
     {
         public int SalesId { get; set; }
+        public int SalesGoodsId { get; set; }
         public int SalesCategoryId { get; set; }
         public int SalesUnitsId { get; set; }
         public int SalesQuantity { get; set; }
         public decimal SalesPrice { get; set; }
         public override string ToString()
         {
-            return SalesId + Delimiter + SalesCategoryId
-                + Delimiter + SalesUnitsId + Delimiter + SalesQuantity
+            return SalesId + Delimiter + SalesCategoryId + Delimiter+
+                SalesGoodsId + Delimiter + SalesUnitsId + Delimiter + SalesQuantity
                 + Delimiter + SalesPrice; 
         }
     }

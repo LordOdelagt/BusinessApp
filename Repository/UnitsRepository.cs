@@ -18,23 +18,7 @@ namespace Repository
         {
             this.warningnMessage = warningMessage;
         }
-        //Получение количества строк. ID будущего элемента = Counter. 
-        private int CheckUnitsID()
-        {
-            //TODO: Переработать через List
-            if (Counter == 0)
-            {
-                using (StreamReader reader = new StreamReader(FilePath, Encoding.UTF8))
-                {
-                    while (reader.ReadLine() != null)
-                    {
-                        Counter++;
-                    }
-                    Counter++;
-                }
-            }
-            return Counter;
-        }
+
         public Units CreateUnits(string? name)
         {
             var unitId = GetUnits().Max(u=>u.Id)+1;
