@@ -113,6 +113,8 @@ namespace Repository
             var Category = list.SingleOrDefault(Category => Category.Id == id);
             var Category1 = list.Remove(Category);
             File.Delete(FilePath);
+            var myFile = File.Create(FilePath);
+            myFile.Close();
             foreach (var item in list)
             {
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))

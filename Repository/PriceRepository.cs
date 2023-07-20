@@ -119,6 +119,8 @@ namespace Repository
             var price = list.SingleOrDefault(price => price.PriceId == id);
             var price1 = list.Remove(price);
             File.Delete(FilePath);
+            var myFile = File.Create(FilePath);
+            myFile.Close();
             foreach (var item in list)
             {
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))

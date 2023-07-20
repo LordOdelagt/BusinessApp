@@ -45,6 +45,8 @@ namespace Repository
             var unit = list.SingleOrDefault(unit => unit.Id == id);
             var unit1 = list.Remove(unit);
             File.Delete(FilePath);
+            var myFile = File.Create(FilePath);
+            myFile.Close();
             foreach (var item in list)
             {
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))

@@ -82,6 +82,8 @@ namespace Repository
             var sale = list.SingleOrDefault(sale => sale.SalesId == id);
             var sale1 = list.Remove(sale);
             File.Delete(FilePath);
+            var myFile = File.Create(FilePath);
+            myFile.Close();
             foreach (var item in list)
             {
                 using (StreamWriter writer = new StreamWriter(FilePath, true, Encoding.UTF8))
